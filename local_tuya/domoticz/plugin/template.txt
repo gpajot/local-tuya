@@ -1,0 +1,31 @@
+"""
+{definition:s}
+"""
+
+from local_tuya.domoticz.units import UnitCommand
+from local_tuya.domoticz.plugin.plugin import Plugin
+
+from {on_start_import_path:s} import {on_start_name:s}
+
+plugin = Plugin(
+    package="{package:s}",
+    on_start={on_start_name:s},
+)
+
+
+def onStart() -> None:
+    global plugin
+    plugin.start(Parameters, Devices)
+
+
+def onStop() -> None:
+    global plugin
+    plugin.stop()
+
+
+def onCommand(_, unit_id, command, level, color) -> None:
+    global plugin
+    plugin.on_command(
+        unit_id,
+        UnitCommand(command, level, color),
+    )

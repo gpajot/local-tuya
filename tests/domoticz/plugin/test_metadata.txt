@@ -1,0 +1,22 @@
+<plugin key="local_tuya" name="Test" author="Gabriel Pajot" version="{version:s}" wikilink="https://github.com/gpajot/local-tuya">
+  <description>
+    <h1>Test plugin</h1>
+    <ul>
+      <li>feature 1</li>
+      <li>feature 2</li>
+    </ul>
+  </description>
+  <params>
+    <param field="Username" label="Device ID" required="true"/>
+    <param field="Address" label="Device IP address" required="true"/>
+    <param field="Port" label="Device port" default="6668"/>
+    <param field="Password" label="Device local key" required="true" password="true"/>
+    <param field="Field1" label="Field">
+      <description>field desc</description>
+      <options>
+        <option value="1" default="true"/>
+        <option value="2"/>
+      </options>
+    </param>
+  </params>
+</plugin>
