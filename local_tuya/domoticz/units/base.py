@@ -62,13 +62,22 @@ T = TypeVar("T")
 class Unit(Generic[T]):
     def __init__(
         self,
+        # ID of the unit in Domoticz.
+        # It has to be unique for the hardware but not across hardwares.
         id_: int,
+        # Domoticz unit type.
         type_: str,
+        # Name that will be suffixed to the hardware name.
         name: str,
+        # Image ID, see `/json.htm?type=custom_light_icons` in Domoticz.
         image: int,
+        # Convert the value of the unit into the Domoticz unit values.
         to_unit_values: Callable[[T], UnitValues],
+        # Convert a Domoticz command into this units value.
         command_to_value: Optional[Callable[[UnitCommand], Optional[T]]] = None,
+        # Function to call when a unit command is triggered.
         command_func: Optional[Callable[[T], Awaitable]] = None,
+        # Options for unit creation.
         options: Optional[Dict[str, str]] = None,
     ):
         self.id = id_

@@ -5,11 +5,12 @@ from local_tuya.protocol import Value, Values
 
 
 class Constraint:
-    """The data point is constrained if any of the exclusions is KO."""
+    """The data point is constrained if any of the exclusions is active."""
 
     def __init__(
         self,
         data_point: DataPoint,
+        # An exclusion is active if its datapoint is in the set of values.
         *exclusions: Tuple[DataPoint, Set[Value]],
         # Only check the constraint if the data point is in those values.
         restrict_to: Optional[Set[Value]] = None,

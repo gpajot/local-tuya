@@ -5,12 +5,7 @@ from local_tuya.protocol import Values
 
 
 class DataPoint(str, Enum):
-    """Data points supported by the device.
-
-    Usage:
-    >>> class SwitchDataPoint(DataPoint):
-    >>>     POWER = "1"
-    """
+    """Data points supported by the device."""
 
 
 class State(ABC):
