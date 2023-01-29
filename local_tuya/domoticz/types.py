@@ -1,3 +1,6 @@
+"""
+Minimal Domoticz types for static typing and mocking in tests.
+"""
 from typing import Dict, Optional
 
 
