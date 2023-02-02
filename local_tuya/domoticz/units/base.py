@@ -103,6 +103,12 @@ class Unit(Generic[T]):
                 **({"Options": self._options} if self._options else {}),
             )
             unit.Create()
+        else:
+            # Update some unit attributes.
+            unit.Image = self._image
+            if self._options:
+                unit.Options = self._options
+            unit.Update(False)
         self._unit = unit
 
     async def on_command(self, command: UnitCommand) -> None:

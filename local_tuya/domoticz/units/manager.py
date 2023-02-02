@@ -19,10 +19,14 @@ class UnitManager(Generic[T]):
         self._units: Dict[int, Unit] = {}
         self._value_from_state: Dict[int, Callable[[T], Any]] = {}
 
-    def register(self, unit: Unit[V], value_from_state: Callable[[T], V]):
+    def register(self, unit: Unit[V], value_from_state: Callable[[T], V]) -> None:
         self._units[unit.id] = unit
         self._value_from_state[unit.id] = value_from_state
         unit.ensure(self._domoticz_units.get(unit.id), self._name)
+
+    def remove(self, unit_id: int) -> None:
+        if unit_id in self._domoticz_units:
+            self._domoticz_units[unit_id].Delete()
 
     async def on_command(self, unit_id: int, command: UnitCommand) -> None:
         unit = self._units.get(unit_id)
