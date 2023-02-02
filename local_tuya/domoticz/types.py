@@ -1,3 +1,6 @@
+"""
+Minimal Domoticz types for static typing and mocking in tests.
+"""
 from typing import Dict, Optional
 
 
@@ -14,11 +17,16 @@ class DomoticzUnit:
         self.nValue: int = 0
         self.sValue: str = ""
         self.Color: str = ""
+        self.Image: Optional[int] = 0
+        self.Options: Optional[Dict[str, str]] = None
 
     def Create(self) -> None:
         ...
 
     def Update(self, Log: bool) -> None:
+        ...
+
+    def Delete(self) -> None:
         ...
 
 

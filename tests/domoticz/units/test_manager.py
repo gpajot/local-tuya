@@ -42,6 +42,11 @@ def test_register(unit, domoticz_unit):
     unit.ensure.assert_called_once_with(domoticz_unit, "the-device")
 
 
+def test_remove(domoticz_unit, manager):
+    manager.remove(1)
+    domoticz_unit.Delete.assert_called_once()
+
+
 @pytest.mark.skipif(
     sys.version_info < (3, 8),
     reason="requires python3.8 or higher for AsyncMock",

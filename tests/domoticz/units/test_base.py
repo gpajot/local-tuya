@@ -43,6 +43,13 @@ def test_unit_creation(unit, domoticz_unit):
     )
 
 
+def test_unit_update(unit, domoticz_unit):
+    unit.ensure(domoticz_unit, "the-device")
+    assert domoticz_unit.Image == 2
+    assert domoticz_unit.Options == {"k": "v"}
+    domoticz_unit.Update.assert_called_once_with(False)
+
+
 async def test_on_command(unit, command_func):
     await unit.on_command(UnitCommand("cmd", 1.1, ""))
 

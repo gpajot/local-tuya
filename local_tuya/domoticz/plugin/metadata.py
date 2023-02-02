@@ -67,7 +67,10 @@ class Parameter:
 
 @dataclass
 class PluginMetadata:
+    # Name that will appear in the hardware dropdown list.
     name: str
+    # Pypi package to pull author, version data.
+    # Will also be used for the location of the plugin in the `plugins` directory.
     package: str
     # If not a string, should be compatible with `xmltodict.unparse`.
     # See https://github.com/martinblech/xmltodict#roundtripping.

@@ -15,6 +15,9 @@ def selector_switch_unit(
     id_: int,
     name: str,
     image: int,
+    # All possible values.
+    # Names will be used for labels.
+    # Values should correspond to what is sent to the tuya device.
     enum: Type[T],
     command_func: Callable[[T], Awaitable],
     off_label: str = "Off",
