@@ -9,8 +9,12 @@ from local_tuya.domoticz.plugin.metadata import PluginMetadata
 
 
 @pytest.fixture()
-def path():
+def path(mocker):
     path = Path(__file__).parent
+    mocker.patch(
+        "local_tuya.domoticz.plugin.install._get_domoticz_path",
+        return_value=path,
+    )
     try:
         yield path
     finally:
@@ -34,7 +38,7 @@ def on_start(mocker, metadata):
 
 
 def test_install_plugin(path, metadata, on_start):
-    install_plugin(path, metadata, on_start, "test.module")
+    install_plugin(metadata, on_start, "test.module")
     plugin_path = path / "plugins" / "test" / "plugin.py"
     assert plugin_path.read_text().split("\n")[:14] == [
         '"""',
