@@ -35,7 +35,7 @@ class TestState:
     @pytest.mark.usefixtures("state")
     async def test_updates(self, notifier, notifier_spy, assert_event_emitted):
         await notifier.emit(ResponseReceived(0, StateResponse({"1": 1, "2": 1}), None))
-        # Wrong format, should not fail.
+        # Wrong to_xml_dict, should not fail.
         assert_event_emitted(StateUpdated({"1": 1, "2": 1}), 0)
         await notifier.emit(
             ResponseReceived(0, StateResponse({"dps": {"1": 1, "2": 1}}), None)

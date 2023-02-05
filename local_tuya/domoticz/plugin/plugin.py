@@ -26,15 +26,15 @@ class Plugin(Generic[T]):
         self._manager: Optional[UnitManager[T]] = None
         self._task_pool: Optional[BlockingThreadedTaskPool] = None
         # Setup loggers to log in Domoticz.
-        for package in ("local_tuya", package):
-            _logger = logging.getLogger(package)
+        for pkg in ("local_tuya", package):
+            _logger = logging.getLogger(pkg)
             _logger.addHandler(LOG_HANDLER)
             _logger.setLevel(logging.DEBUG)
 
     @staticmethod
     def _protocol_config(parameters: Dict[str, str]) -> ProtocolConfig:
         return ProtocolConfig(
-            id=parameters["Username"],
+            id_=parameters["Username"],
             address=parameters["Address"],
             port=int(parameters["Port"]),
             key=parameters["Password"].encode(),

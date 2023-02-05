@@ -83,8 +83,8 @@ class Sender(AbstractAsyncContextManager):
         self._pending_tasks[(sequence_number, type(event.command))] = task
         try:
             await task
-        except asyncio.TimeoutError:
-            raise CommandTimeoutError()
+        except asyncio.TimeoutError as e:
+            raise CommandTimeoutError() from e
 
     def _get_sequence_number(self, command: Command) -> int:
         if isinstance(command, HeartbeatCommand):

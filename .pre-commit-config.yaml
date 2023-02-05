@@ -8,16 +8,9 @@ repos:
         pass_filenames: true
         types:
           - python
-      - id: isort
-        name: isort
-        entry: poetry run isort
-        language: system
-        pass_filenames: true
-        types:
-          - python
-      - id: flake8
-        name: flake8
-        entry: poetry run flake8
+      - id: ruff
+        name: ruff
+        entry: poetry run ruff --fix
         language: system
         pass_filenames: true
         types:

@@ -6,7 +6,7 @@ from typing import Any, Awaitable, Callable, DefaultDict, List, Type, TypeVar, c
 from typing_extensions import ParamSpec
 
 
-class Event(ABC):
+class Event(ABC):  # noqa: B024
     """Base event class"""
 
 
