@@ -9,10 +9,10 @@ T = TypeVar("T", bound=State)
 
 
 def install_plugin(
-    domoticz_path: Path,
     metadata: PluginMetadata,
     on_start: OnStart,
     on_start_import_path: str,
+    domoticz_path: Path = Path("~/domoticz").expanduser(),
 ) -> None:
     target = domoticz_path / "plugins" / metadata.package / "plugin.py"
     if not target.parent.exists():

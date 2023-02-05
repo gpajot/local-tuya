@@ -34,7 +34,7 @@ def on_start(mocker, metadata):
 
 
 def test_install_plugin(path, metadata, on_start):
-    install_plugin(path, metadata, on_start, "test.module")
+    install_plugin(metadata, on_start, "test.module", path)
     plugin_path = path / "plugins" / "test" / "plugin.py"
     assert plugin_path.read_text().split("\n")[:14] == [
         '"""',
