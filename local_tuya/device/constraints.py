@@ -40,7 +40,7 @@ class Constraints:
             constraint.data_point: constraint for constraint in constraints
         }
 
-    def filter(self, values: Values, current: Values) -> Values:
+    def filter_values(self, values: Values, current: Values) -> Values:
         """Filter values that can be updated given the device constraints."""
         # Check on merged values.
         merged = {**current, **values}

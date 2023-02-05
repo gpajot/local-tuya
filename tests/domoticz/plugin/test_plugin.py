@@ -74,7 +74,7 @@ def test_start(plugin, parameters, manager, on_start, device):
     device.__aenter__.assert_awaited_once()
     on_start.assert_called_once_with(
         ProtocolConfig(
-            id="id",
+            id_="id",
             address="localhost",
             port=6666,
             key=b"key",

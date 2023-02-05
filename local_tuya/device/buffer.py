@@ -96,4 +96,4 @@ class UpdateBuffer(BackgroundTask):
         filtered = {k: v for k, v in values.items() if state[k] != v}
         if not self._constraints:
             return filtered
-        return self._constraints.filter(filtered, state)
+        return self._constraints.filter_values(filtered, state)

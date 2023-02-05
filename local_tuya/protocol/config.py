@@ -12,7 +12,7 @@ class Version(bytes, Enum):
 
 @dataclass
 class ProtocolConfig:
-    id: str
+    id_: str
     address: str
     key: bytes
     port: int = 6668
