@@ -1,6 +1,8 @@
 # Domoticz
 The purpose of this module is to provide tools to create a plugin for a tuya device.
 
+> 💡 The Domoticz version should be `2022.1` or higher.
+
 ## Creating the plugin
 To create a plugin, you will need to create 2 things.
 
@@ -48,6 +50,7 @@ Units represent a Domoticz device and is associated to a Domoticz hardware.
 #### Manager
 The role of the manager is to
 - create units: `register` method
+- remove units: `remove` method
 - dispatch the commands from units: `on_command` method
 - update units state: `update` method
 
@@ -63,9 +66,6 @@ For common units parameters, see the [base](./units/base.py).
 You should provide a script that will be used to install the plugin.
 It would look like:
 ```python
-from pathlib import Path
-import sys
-
 from local_tuya.domoticz import install_plugin, PluginMetadata
 
 def on_start(...):
@@ -74,7 +74,6 @@ def on_start(...):
 
 if __name__ == "__main__":
     install_plugin(
-        domoticz_path=Path(sys.argv[1] if len(sys.argv) > 1 else "/home/domoticz/domoticz"),
         metadata=PluginMetadata(...),
         on_start=on_start,
         on_start_import_path="my_device.domoticz",
