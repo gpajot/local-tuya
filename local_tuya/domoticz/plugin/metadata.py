@@ -30,7 +30,7 @@ class Option:
     value: str
     default: bool = False
 
-    def format(self) -> XML:
+    def to_xml_dict(self) -> XML:
         return _filter_xml_dict(
             {
                 "@value": self.value,
@@ -49,7 +49,7 @@ class Parameter:
     description: XML = ""
     options: Tuple[Option, ...] = ()
 
-    def format(self) -> XML:
+    def to_xml_dict(self) -> XML:
         return _filter_xml_dict(
             {
                 "@field": self.field,
@@ -59,7 +59,7 @@ class Parameter:
                 "@password": _xml_bool(self.password),
                 "description": self.description,
                 "options": _filter_xml_dict(
-                    {"option": [o.format() for o in self.options]}
+                    {"option": [o.to_xml_dict() for o in self.options]}
                 ),
             }
         )
@@ -104,7 +104,7 @@ class PluginMetadata:
                     "@externallink": self.external_link,
                     "description": self.description,
                     "params": {
-                        "param": [p.format() for p in self.parameters],
+                        "param": [p.to_xml_dict() for p in self.parameters],
                     },
                 }
             ),

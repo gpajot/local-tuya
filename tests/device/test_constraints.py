@@ -59,4 +59,4 @@ class TestConstraints:
             Constraint(DPS.A, (DPS.B, {10})),
             Constraint(DPS.C, (DPS.B, {10}), restrict_to={20}),
         )
-        assert constraints.filter(values, current) == expected
+        assert constraints.filter_values(values, current) == expected

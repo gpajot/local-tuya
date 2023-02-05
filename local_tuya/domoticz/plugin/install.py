@@ -7,12 +7,14 @@ from local_tuya.domoticz.plugin.plugin import OnStart
 
 T = TypeVar("T", bound=State)
 
+DEFAULT_DOMOTICZ_PATH = Path("~/domoticz").expanduser()
+
 
 def install_plugin(
     metadata: PluginMetadata,
     on_start: OnStart,
     on_start_import_path: str,
-    domoticz_path: Path = Path("~/domoticz").expanduser(),
+    domoticz_path: Path = DEFAULT_DOMOTICZ_PATH,
 ) -> None:
     target = domoticz_path / "plugins" / metadata.package / "plugin.py"
     if not target.parent.exists():
