@@ -23,6 +23,10 @@ def onStop() -> None:
     plugin.stop()
 
 
+def onHeartbeat() -> None:
+    ...
+
+
 def onCommand(_, unit_id, command, level, color) -> None:
     global plugin
     plugin.on_command(

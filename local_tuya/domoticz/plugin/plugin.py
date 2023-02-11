@@ -1,4 +1,5 @@
 import logging
+from contextlib import AsyncExitStack
 from typing import Callable, Dict, Generic, Optional, TypeVar
 
 from concurrent_tasks import BlockingThreadedTaskPool
@@ -14,6 +15,21 @@ LOG_HANDLER = DomoticzHandler()
 
 T = TypeVar("T", bound=State)
 OnStart = Callable[[ProtocolConfig, Dict[str, str], UnitManager[T]], Device[T]]
+
+
+class DeviceContextManager(AsyncExitStack):
+    """To make devices work they need to be initialized in the task pool
+    so that all asyncio primitives are attached to the right event loop.
+    """
+
+    def __init__(self, get_device: Callable[[], Device]):
+        super().__init__()
+        self._get_device = get_device
+        self._device: Optional[Device] = None
+
+    async def __aenter__(self):
+        self._device = await self.enter_async_context(self._get_device())
+        return self
 
 
 class Plugin(Generic[T]):
@@ -48,15 +64,22 @@ class Plugin(Generic[T]):
         """Start the device in a separate thread."""
         self.stop()
         name = parameters["Name"]
-        self._manager = UnitManager(
+        manager: UnitManager[T] = UnitManager(
             name=name,
             units=devices[name].Units if name in devices else {},
         )
-        device = self._on_start(
-            self._protocol_config(parameters), parameters, self._manager
+        self._manager = manager
+
+        def _get_device() -> Device[T]:
+            device = self._on_start(
+                self._protocol_config(parameters), parameters, manager
+            )
+            device.set_state_updated_callback(manager.update)
+            return device
+
+        self._task_pool = BlockingThreadedTaskPool(
+            context_manager=DeviceContextManager(_get_device)
         )
-        device.set_state_updated_callback(self._manager.update)
-        self._task_pool = BlockingThreadedTaskPool(context_manager=device)
         self._task_pool.start()
 
     def stop(self) -> None:
