@@ -1,4 +1,4 @@
-<plugin key="local_tuya" name="Test" author="Gabriel Pajot" version="{version:s}" wikilink="https://github.com/gpajot/local-tuya">
+<plugin key="local_tuya" name="Test" author="Gabriel Pajot" version="{version:s}" externallink="https://github.com/gpajot/local-tuya">
   <description>
     <h1>Test plugin</h1>
     <ul>

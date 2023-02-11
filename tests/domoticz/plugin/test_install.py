@@ -26,7 +26,7 @@ def path(mocker):
 def metadata(mocker):
     metadata = mocker.Mock(spec=PluginMetadata)
     metadata.package = "test"
-    metadata.definition.return_value = "test definition"
+    metadata.definition.return_value = "test definition {version:s}"
     return metadata
 
 
@@ -40,15 +40,16 @@ def on_start(mocker, metadata):
 def test_install_plugin(path, metadata, on_start):
     install_plugin(metadata, on_start, "test.module")
     plugin_path = path / "plugins" / "test" / "plugin.py"
-    assert plugin_path.read_text().split("\n")[:14] == [
-        '"""',
-        "test definition",
-        '"""',
-        "",
-        "from local_tuya.domoticz.units import UnitCommand",
+    assert plugin_path.read_text().split("\n")[:15] == [
+        "from local_tuya.domoticz.plugin.metadata import get_package_metadata",
         "from local_tuya.domoticz.plugin.plugin import Plugin",
+        "from local_tuya.domoticz.units import UnitCommand",
         "",
         "from test.module import on_start",
+        "",
+        '"""',
+        "test definition {version:s}",
+        '""".format(version=get_package_metadata("test").get("Version", "1.0.0"))',
         "",
         "plugin = Plugin(",
         '    package="test",',
