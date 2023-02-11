@@ -7,9 +7,21 @@ import pytest
 from local_tuya.device import Device
 from local_tuya.domoticz.plugin.metadata import PluginMetadata
 from local_tuya.domoticz.plugin.plugin import Plugin
+from local_tuya.domoticz.types import DomoticzEx
+from local_tuya.domoticz.units import UnitId
 from local_tuya.domoticz.units.base import UnitCommand
 from local_tuya.domoticz.units.manager import UnitManager
 from local_tuya.protocol import ProtocolConfig
+
+
+class TheUnitId(UnitId):
+    ONE = 1
+    TWO = 2
+
+
+@pytest.fixture()
+def domoticz(mocker):
+    return mocker.patch("local_tuya.domoticz.plugin.plugin.DomoticzEx", spec=DomoticzEx)
 
 
 @pytest.fixture()
@@ -31,9 +43,15 @@ def units(mocker):
 
 @pytest.fixture()
 def manager(mocker):
-    manager = mocker.Mock(spec=UnitManager)
-    mocker.patch("local_tuya.domoticz.plugin.plugin.UnitManager", return_value=manager)
-    return manager
+    return mocker.Mock(spec=UnitManager)
+
+
+@pytest.fixture()
+def manager_init(mocker, manager):
+    return mocker.patch(
+        "local_tuya.domoticz.plugin.plugin.UnitManager",
+        return_value=manager,
+    )
 
 
 @pytest.fixture()
@@ -49,13 +67,17 @@ def parameters():
         "Address": "localhost",
         "Port": "6666",
         "Password": "key",
+        "Mode5": "one",
+        "Mode6": "no",
     }
 
 
 @pytest.fixture()
-def plugin(mocker, metadata, units, parameters, manager, on_start):
+def plugin(
+    mocker, metadata, units, parameters, manager, manager_init, on_start, domoticz
+):
     mocker.patch("local_tuya.domoticz.plugin.plugin.LOG_HANDLER", new=NullHandler())
-    plugin: Plugin[Any] = Plugin("test", on_start)
+    plugin: Plugin[Any] = Plugin("test", on_start, TheUnitId)
     _device = mocker.Mock()
     _device.Units = units
     plugin.start(parameters, {"test": _device})
@@ -70,8 +92,24 @@ def plugin(mocker, metadata, units, parameters, manager, on_start):
     reason="requires python3.8 or higher for AsyncMock",
 )
 @pytest.mark.usefixtures("plugin")
-def test_start(plugin, parameters, manager, on_start, device):
+def test_start(
+    plugin,
+    parameters,
+    manager,
+    manager_init,
+    on_start,
+    device,
+    domoticz,
+    units,
+):
     device.__aenter__.assert_awaited_once()
+    domoticz.Heartbeat.assert_called_once_with(15)
+    domoticz.Debugging.assert_called_once_with(4)
+    manager_init.assert_called_once_with(
+        name="test",
+        units=units,
+        included_units={TheUnitId.ONE},
+    )
     on_start.assert_called_once_with(
         ProtocolConfig(
             id_="id",

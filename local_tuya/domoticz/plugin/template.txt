@@ -1,16 +1,25 @@
+"""{definition:s}"""
+
+import sys
+
 from local_tuya.domoticz.plugin.metadata import get_package_metadata
 from local_tuya.domoticz.plugin.plugin import Plugin
 from local_tuya.domoticz.units import UnitCommand
 
-from {on_start_import_path:s} import {on_start_name:s}
+from {import_path:s} import {on_start_name:s}
+try:
+    from {import_path:s} import {unit_ids_name:s}
+except ImportError:
+    {unit_ids_name:s} = None
 
-"""
-{definition:s}
-""".format(version=get_package_metadata("{package:s}").get("Version", "1.0.0"))
+sys.modules[__name__].__doc__ = sys.modules[__name__].__doc__.format(
+    version=get_package_metadata("{package:s}").get("Version", "1.0.0"),
+)
 
 plugin = Plugin(
     package="{package:s}",
     on_start={on_start_name:s},
+    unit_ids={unit_ids_name:s},
 )
 
 

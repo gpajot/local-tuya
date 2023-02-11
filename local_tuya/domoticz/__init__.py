@@ -2,6 +2,7 @@ from local_tuya.domoticz.plugin import Option, Parameter, PluginMetadata, instal
 from local_tuya.domoticz.units import (
     SelectorSwitchStyle,
     Unit,
+    UnitId,
     UnitManager,
     selector_switch_unit,
     set_point_unit,

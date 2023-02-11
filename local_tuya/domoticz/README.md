@@ -22,13 +22,14 @@ For a switch unit, it would look like:
 from typing import Dict
 
 from local_tuya import DeviceConfig, ProtocolConfig
-from my_device import SwitchState, SwitchDevice
 from local_tuya.domoticz import UnitManager, switch_unit
+
+from my_device import SwitchState, SwitchDevice
 
 
 def on_start(
     protocol_config: ProtocolConfig,
-    parameters: Dict[str, str],
+    _: Dict[str, str],
     manager: UnitManager[SwitchState],
 ) -> SwitchDevice:
     device = SwitchDevice(config=DeviceConfig(protocol=protocol_config))
@@ -49,8 +50,7 @@ Units represent a Domoticz device and is associated to a Domoticz hardware.
 
 #### Manager
 The role of the manager is to
-- create units: `register` method
-- remove units: `remove` method
+- create/remove units: `register` method
 - dispatch the commands from units: `on_command` method
 - update units state: `update` method
 
@@ -76,6 +76,13 @@ if __name__ == "__main__":
     install_plugin(
         metadata=PluginMetadata(...),
         on_start=on_start,
-        on_start_import_path="my_device.domoticz",
+        import_path="my_device.domoticz",
     )
 ```
+
+> 💡 Domoticz path defaults to `~/domoticz` a `-p` option can be passed to change that.
+
+### Filtering units
+You can automatically add an option to the plugin to filter created units.
+
+To enable it, you need to implement `local_tuya.domoticz.UnitId` and add all unit IDs, then simply pass it to the `install` function. `UnitManager.register` will handle device deletion.

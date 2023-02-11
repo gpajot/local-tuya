@@ -1,14 +1,19 @@
 import logging
 from contextlib import AsyncExitStack
-from typing import Callable, Dict, Generic, Optional, TypeVar
+from typing import Callable, Dict, Generic, Optional, Type, TypeVar
 
 from concurrent_tasks import BlockingThreadedTaskPool
 
 from local_tuya.device import Device, State
 from local_tuya.domoticz.logger import DomoticzHandler
 from local_tuya.domoticz.types import DomoticzDevice
-from local_tuya.domoticz.units import UnitCommand, UnitManager
+from local_tuya.domoticz.units import UnitCommand, UnitId, UnitManager
 from local_tuya.protocol import ProtocolConfig
+
+try:
+    import DomoticzEx
+except ModuleNotFoundError:
+    from local_tuya.domoticz.types import DomoticzEx
 
 logger = logging.getLogger(__name__)
 LOG_HANDLER = DomoticzHandler()
@@ -37,8 +42,14 @@ class Plugin(Generic[T]):
     It connects the device to Domoticz units.
     """
 
-    def __init__(self, package: str, on_start: OnStart):
+    def __init__(
+        self,
+        package: str,
+        on_start: OnStart,
+        unit_ids: Optional[Type[UnitId]],
+    ):
         self._on_start = on_start
+        self._unit_ids = unit_ids
         self._manager: Optional[UnitManager[T]] = None
         self._task_pool: Optional[BlockingThreadedTaskPool] = None
         # Setup loggers to log in Domoticz.
@@ -63,10 +74,16 @@ class Plugin(Generic[T]):
     ) -> None:
         """Start the device in a separate thread."""
         self.stop()
+        DomoticzEx.Heartbeat(15)
+        DomoticzEx.Debugging(2 + 4 + 8 if parameters.get("Mode6", "") == "1" else 4)
         name = parameters["Name"]
+        included_units = parameters.get("Mode5", "")
         manager: UnitManager[T] = UnitManager(
             name=name,
             units=devices[name].Units if name in devices else {},
+            included_units=self._unit_ids.included(included_units)
+            if self._unit_ids and included_units
+            else None,
         )
         self._manager = manager
 

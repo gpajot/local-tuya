@@ -1,4 +1,5 @@
 from local_tuya.domoticz.units.base import Unit, UnitCommand
+from local_tuya.domoticz.units.ids import UnitId
 from local_tuya.domoticz.units.manager import UnitManager
 from local_tuya.domoticz.units.selector_switch import (
     SelectorSwitchStyle,
