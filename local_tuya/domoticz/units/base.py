@@ -92,7 +92,7 @@ class Unit(Generic[T]):
 
     def ensure(self, unit: Optional[DomoticzUnit], device_name: str) -> None:
         if unit is None:
-            logger.info("creating unit %s for device %s", self._name, device_name)
+            logger.info("creating unit %s (%s)", self._name, self.id)
             full_name = f"{device_name} {self._name}"
             unit = DomoticzEx.Unit(
                 Name=full_name,
@@ -106,8 +106,9 @@ class Unit(Generic[T]):
         else:
             # Update some unit attributes.
             unit.Image = self._image
-            if self._options:
-                unit.Options = self._options
+            # Should be read/write but raises `AttributeError: readonly attribute`.
+            # if self._options:
+            #     unit.Options = self._options
             unit.Update(False)
         self._unit = unit
 
