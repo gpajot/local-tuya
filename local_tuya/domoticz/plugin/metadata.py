@@ -9,7 +9,7 @@ if sys.version_info < (3, 8):
 else:
     from importlib.metadata import metadata as pkg_metadata
 
-from typing import Dict, List, Tuple, Union, cast
+from typing import Dict, List, Tuple, Union
 
 import xmltodict
 
@@ -65,6 +65,10 @@ class Parameter:
         )
 
 
+def get_package_metadata(package: str) -> Mapping[str, str]:
+    return pkg_metadata(package)  # type: ignore
+
+
 @dataclass
 class PluginMetadata:
     # Name that will appear in the hardware dropdown list.
@@ -91,17 +95,17 @@ class PluginMetadata:
         )
 
     def definition(self) -> str:
-        package_metadata = cast(Mapping, pkg_metadata(self.package))
+        package_metadata = get_package_metadata(self.package)
         xml = {
             "plugin": _filter_xml_dict(
                 {
                     "@key": self.package,
                     "@name": self.name,
                     "@author": package_metadata.get("Author", "unknown"),
-                    "@version": package_metadata.get("Version", "1.0.0"),
-                    "@wikilink": self.wiki_link
+                    "@version": "{version:s}",
+                    "@wikilink": self.wiki_link,
+                    "@externallink": self.external_link
                     or package_metadata.get("Home-page", ""),
-                    "@externallink": self.external_link,
                     "description": self.description,
                     "params": {
                         "param": [p.to_xml_dict() for p in self.parameters],
