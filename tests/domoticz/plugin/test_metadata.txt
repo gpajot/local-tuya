@@ -18,5 +18,12 @@
         <option value="2"/>
       </options>
     </param>
+    <param field="Mode5" label="Included units" default="one,two"/>
+    <param field="Mode6" label="Debug">
+      <options>
+        <option value="0" default="true"/>
+        <option value="1"/>
+      </options>
+    </param>
   </params>
 </plugin>

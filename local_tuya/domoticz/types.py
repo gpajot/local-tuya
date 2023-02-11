@@ -47,6 +47,10 @@ class DomoticzEx:
     def Heartbeat(cls, i: int) -> None:
         ...
 
+    @classmethod
+    def Debugging(cls, i: int) -> None:
+        ...
+
     Unit = DomoticzUnit
 
 

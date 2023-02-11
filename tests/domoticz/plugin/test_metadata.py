@@ -1,6 +1,12 @@
 from pathlib import Path
 
 from local_tuya.domoticz.plugin.metadata import Option, Parameter, PluginMetadata
+from local_tuya.domoticz.units import UnitId
+
+
+class TheUnitId(UnitId):
+    ONE = 1
+    TWO = 2
 
 
 def test_definition():
@@ -24,4 +30,4 @@ def test_definition():
         ),
     )
     test_file = Path(__file__).parent / "test_metadata.txt"
-    assert metadata.definition() == test_file.read_text()
+    assert metadata.definition(TheUnitId) == test_file.read_text()

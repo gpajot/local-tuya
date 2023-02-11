@@ -3,15 +3,16 @@ from __future__ import annotations
 import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Type, Union
+
+import xmltodict
+
+from local_tuya.domoticz.units import UnitId
 
 if sys.version_info < (3, 8):
     from importlib_metadata import metadata as pkg_metadata
 else:
     from importlib.metadata import metadata as pkg_metadata
-
-from typing import Dict, List, Tuple, Union
-
-import xmltodict
 
 XML = Union[str, Dict[str, "XML"], List["XML"]]
 
@@ -83,18 +84,7 @@ class PluginMetadata:
     external_link: str = ""
     parameters: Tuple[Parameter, ...] = ()
 
-    def __post_init__(self):
-        self.parameters = (
-            Parameter(field="Username", label="Device ID", required=True),
-            Parameter(field="Address", label="Device IP address", required=True),
-            Parameter(field="Port", label="Device port", default="6668"),
-            Parameter(
-                field="Password", label="Device local key", required=True, password=True
-            ),
-            *self.parameters,
-        )
-
-    def definition(self) -> str:
+    def definition(self, unit_ids: Optional[Type[UnitId]]) -> str:
         package_metadata = get_package_metadata(self.package)
         xml = {
             "plugin": _filter_xml_dict(
@@ -108,7 +98,48 @@ class PluginMetadata:
                     or package_metadata.get("Home-page", ""),
                     "description": self.description,
                     "params": {
-                        "param": [p.to_xml_dict() for p in self.parameters],
+                        "param": [
+                            p.to_xml_dict()
+                            for p in (
+                                Parameter(
+                                    field="Username", label="Device ID", required=True
+                                ),
+                                Parameter(
+                                    field="Address",
+                                    label="Device IP address",
+                                    required=True,
+                                ),
+                                Parameter(
+                                    field="Port", label="Device port", default="6668"
+                                ),
+                                Parameter(
+                                    field="Password",
+                                    label="Device local key",
+                                    required=True,
+                                    password=True,
+                                ),
+                                *self.parameters,
+                                *(
+                                    (
+                                        Parameter(
+                                            field="Mode5",
+                                            label="Included units",
+                                            default=unit_ids.names(),
+                                        ),
+                                    )
+                                    if unit_ids
+                                    else ()
+                                ),
+                                Parameter(
+                                    field="Mode6",
+                                    label="Debug",
+                                    options=(
+                                        Option(label="No", value="0", default=True),
+                                        Option(label="Yes", value="1"),
+                                    ),
+                                ),
+                            )
+                        ],
                     },
                 }
             ),
