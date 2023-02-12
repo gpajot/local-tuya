@@ -11,7 +11,7 @@ from local_tuya.domoticz.types import DomoticzEx
 from local_tuya.domoticz.units import UnitId
 from local_tuya.domoticz.units.base import UnitCommand
 from local_tuya.domoticz.units.manager import UnitManager
-from local_tuya.protocol import ProtocolConfig
+from local_tuya.protocol import ProtocolConfig, Version
 
 
 class TheUnitId(UnitId):
@@ -67,6 +67,7 @@ def parameters():
         "Address": "localhost",
         "Port": "6666",
         "Password": "key",
+        "Mode4": "3.3",
         "Mode5": "one",
         "Mode6": "no",
     }
@@ -116,6 +117,7 @@ def test_start(
             address="localhost",
             port=6666,
             key=b"key",
+            version=Version.v33,
         ),
         parameters,
         manager,

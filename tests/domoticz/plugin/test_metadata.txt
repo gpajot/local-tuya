@@ -18,6 +18,11 @@
         <option label="option 2" value="2"/>
       </options>
     </param>
+    <param field="Mode4" label="Tuya version">
+      <options>
+        <option label="3.3" value="3.3" default="true"/>
+      </options>
+    </param>
     <param field="Mode5" label="Included units" default="one,two"/>
     <param field="Mode6" label="Debug">
       <options>

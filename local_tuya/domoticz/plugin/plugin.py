@@ -7,7 +7,7 @@ from local_tuya.device import Device, State
 from local_tuya.domoticz.logger import DomoticzHandler
 from local_tuya.domoticz.types import DomoticzDevice
 from local_tuya.domoticz.units import UnitCommand, UnitId, UnitManager
-from local_tuya.protocol import ProtocolConfig
+from local_tuya.protocol import ProtocolConfig, Version
 
 try:
     import DomoticzEx
@@ -49,6 +49,7 @@ class Plugin(Generic[T]):
             address=parameters["Address"],
             port=int(parameters["Port"]),
             key=parameters["Password"].encode(),
+            version=Version(parameters["Mode4"].encode()),
         )
 
     def _setup_logging(self, debug: bool) -> None:
