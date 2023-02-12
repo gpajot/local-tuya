@@ -80,8 +80,7 @@ class Transport(asyncio.Protocol):
                     )
                     return cast(asyncio.transports.WriteTransport, transport)
                 except Exception:
-                    logger.warning("could not connect, retrying...")
-                    logger.debug("", exc_info=True)
+                    logger.warning("could not connect, retrying...", exc_info=True)
                     await backoff()
 
     def connection_lost(self, exc: Optional[Exception]) -> None:

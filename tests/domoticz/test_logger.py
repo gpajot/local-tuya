@@ -25,12 +25,17 @@ def domoticz_logger(mocker, logger):
 
 def test_debug(logger, domoticz_logger):
     logger.debug("the message")
-    domoticz_logger.Debug.assert_called_once_with(f"DEBUG: {__name__}: the message")
+    domoticz_logger.Log.assert_called_once_with(f"DEBUG: {__name__}: the message")
 
 
 def test_info(logger, domoticz_logger):
     logger.info("the message")
-    domoticz_logger.Log.assert_called_once_with(f"INFO: {__name__}: the message")
+    domoticz_logger.Status.assert_called_once_with(f"INFO: {__name__}: the message")
+
+
+def test_warning(logger, domoticz_logger):
+    logger.warning("the message")
+    domoticz_logger.Error.assert_called_once_with(f"WARNING: {__name__}: the message")
 
 
 def test_error(logger, domoticz_logger):
