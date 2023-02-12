@@ -34,6 +34,7 @@ class Option:
     def to_xml_dict(self) -> XML:
         return _filter_xml_dict(
             {
+                "@label": self.label,
                 "@value": self.value,
                 "@default": _xml_bool(self.default),
             }

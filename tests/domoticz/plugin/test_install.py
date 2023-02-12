@@ -73,7 +73,7 @@ def test_install_plugin(path, metadata, on_start, plugin, plugin_init, plugin_mo
         ["poetry", "version", "--short"], encoding="utf-8"
     ).strip()
 
-    assert generated_plugin.__doc__ == f"test definition {version}"
+    assert generated_plugin.__doc__ == f"\ntest definition {version}\n"
     plugin_init.assert_called_once_with(
         package="local_tuya",
         on_start=on_start,
