@@ -1,8 +1,7 @@
 import logging
-from contextlib import AsyncExitStack
 from typing import Callable, Dict, Generic, Optional, Type, TypeVar
 
-from concurrent_tasks import BlockingThreadedTaskPool
+from concurrent_tasks import BlockingThreadedTaskPool, ThreadedPoolContextManagerWrapper
 
 from local_tuya.device import Device, State
 from local_tuya.domoticz.logger import DomoticzHandler
@@ -20,21 +19,6 @@ LOG_HANDLER = DomoticzHandler()
 
 T = TypeVar("T", bound=State)
 OnStart = Callable[[ProtocolConfig, Dict[str, str], UnitManager[T]], Device[T]]
-
-
-class DeviceContextManager(AsyncExitStack):
-    """To make devices work they need to be initialized in the task pool
-    so that all asyncio primitives are attached to the right event loop.
-    """
-
-    def __init__(self, get_device: Callable[[], Device]):
-        super().__init__()
-        self._get_device = get_device
-        self._device: Optional[Device] = None
-
-    async def __aenter__(self):
-        self._device = await self.enter_async_context(self._get_device())
-        return self
 
 
 class Plugin(Generic[T]):
@@ -102,7 +86,7 @@ class Plugin(Generic[T]):
             return device
 
         self._task_pool = BlockingThreadedTaskPool(
-            context_manager=DeviceContextManager(_get_device)
+            context_manager=ThreadedPoolContextManagerWrapper(_get_device),
         )
         self._task_pool.start()
 
