@@ -1,4 +1,6 @@
-"""{definition:s}"""
+"""
+{definition:s}
+"""
 
 import sys
 

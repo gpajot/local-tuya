@@ -14,15 +14,15 @@
     <param field="Field1" label="Field">
       <description>field desc</description>
       <options>
-        <option value="1" default="true"/>
-        <option value="2"/>
+        <option label="option 1" value="1" default="true"/>
+        <option label="option 2" value="2"/>
       </options>
     </param>
     <param field="Mode5" label="Included units" default="one,two"/>
     <param field="Mode6" label="Debug">
       <options>
-        <option value="0" default="true"/>
-        <option value="1"/>
+        <option label="No" value="0" default="true"/>
+        <option label="Yes" value="1"/>
       </options>
     </param>
   </params>
