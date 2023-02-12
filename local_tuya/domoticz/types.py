@@ -40,6 +40,10 @@ class DomoticzEx:
         ...
 
     @classmethod
+    def Status(cls, s: str) -> None:
+        ...
+
+    @classmethod
     def Error(cls, s: str) -> None:
         ...
 

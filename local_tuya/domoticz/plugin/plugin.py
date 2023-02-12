@@ -48,6 +48,7 @@ class Plugin(Generic[T]):
         on_start: OnStart,
         unit_ids: Optional[Type[UnitId]],
     ):
+        self._package = package
         self._on_start = on_start
         self._unit_ids = unit_ids
         self._manager: Optional[UnitManager[T]] = None
@@ -56,7 +57,6 @@ class Plugin(Generic[T]):
         for pkg in ("local_tuya", package):
             _logger = logging.getLogger(pkg)
             _logger.addHandler(LOG_HANDLER)
-            _logger.setLevel(logging.DEBUG)
 
     @staticmethod
     def _protocol_config(parameters: Dict[str, str]) -> ProtocolConfig:
@@ -67,6 +67,13 @@ class Plugin(Generic[T]):
             key=parameters["Password"].encode(),
         )
 
+    def _setup_logging(self, debug: bool) -> None:
+        DomoticzEx.Debugging(2 + 4 + 8 if debug else 4)
+        # Setup loggers to log in Domoticz.
+        for pkg in ("local_tuya", self._package):
+            _logger = logging.getLogger(pkg)
+            _logger.setLevel(logging.DEBUG if debug else logging.INFO)
+
     def start(
         self,
         parameters: Dict[str, str],
@@ -74,8 +81,8 @@ class Plugin(Generic[T]):
     ) -> None:
         """Start the device in a separate thread."""
         self.stop()
+        self._setup_logging(parameters.get("Mode6", "") == "1")
         DomoticzEx.Heartbeat(15)
-        DomoticzEx.Debugging(2 + 4 + 8 if parameters.get("Mode6", "") == "1" else 4)
         name = parameters["Name"]
         included_units = parameters.get("Mode5", "")
         manager: UnitManager[T] = UnitManager(
