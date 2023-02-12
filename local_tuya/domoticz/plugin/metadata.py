@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple, Type, Union
 import xmltodict
 
 from local_tuya.domoticz.units import UnitId
+from local_tuya.protocol import Version
 
 if sys.version_info < (3, 8):
     from importlib_metadata import metadata as pkg_metadata
@@ -120,6 +121,18 @@ class PluginMetadata:
                                     password=True,
                                 ),
                                 *self.parameters,
+                                Parameter(
+                                    field="Mode4",
+                                    label="Tuya version",
+                                    options=tuple(
+                                        Option(
+                                            label=v.decode(),
+                                            value=v.decode(),
+                                            default=v == Version.v33,
+                                        )
+                                        for v in Version
+                                    ),
+                                ),
                                 *(
                                     (
                                         Parameter(
