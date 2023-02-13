@@ -1,6 +1,5 @@
 import logging
 from typing import Any, Callable, Dict, Generic, Optional, Set, TypeVar
-from weakref import WeakValueDictionary
 
 from local_tuya.device import State
 from local_tuya.domoticz.types import DomoticzUnit
@@ -22,9 +21,7 @@ class UnitManager(Generic[T]):
     ):
         super().__init__()
         self._name = name
-        self._domoticz_units: WeakValueDictionary[
-            int, DomoticzUnit
-        ] = WeakValueDictionary(units)
+        self._domoticz_units = units
         self._included_units = included_units
         self._units: Dict[int, Unit] = {}
         self._value_from_state: Dict[int, Callable[[T], Any]] = {}
@@ -47,3 +44,8 @@ class UnitManager(Generic[T]):
         logger.debug("received new device state: %s", state)
         for id_, unit in self._units.items():
             unit.update(self._value_from_state[id_](state))
+
+    def cleanup_domoticz_references(self) -> None:
+        """Prevent keeping references to domoticz units."""
+        self._domoticz_units = {}
+        self._units = {}
