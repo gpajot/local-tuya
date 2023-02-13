@@ -3,6 +3,7 @@ import logging
 from dataclasses import asdict, dataclass
 from enum import IntEnum
 from typing import Awaitable, Callable, Dict, Generic, Optional, TypeVar
+from weakref import ReferenceType, ref
 
 try:
     import DomoticzEx
@@ -85,7 +86,7 @@ class Unit(Generic[T]):
         self._name = name
         self._image = image
         self._options = options
-        self._unit: Optional[DomoticzUnit] = None
+        self._unit: Optional[ReferenceType[DomoticzUnit]] = None
         self._to_unit_values = to_unit_values
         self._command_to_value = command_to_value
         self._command_func = command_func
@@ -110,7 +111,7 @@ class Unit(Generic[T]):
             # if self._options:
             #     unit.Options = self._options
             unit.Update(False)
-        self._unit = unit
+        self._unit = ref(unit)
 
     async def on_command(self, command: UnitCommand) -> None:
         if self._command_to_value and self._command_func:
@@ -121,17 +122,20 @@ class Unit(Generic[T]):
     def update(self, value: T) -> None:
         if self._unit is None:
             raise RuntimeError(f"unit {self.id} {self._name} not registered")
+        unit = self._unit()
+        if unit is None:
+            raise RuntimeError(f"unit {self.id} {self._name} no longer present")
         values = self._to_unit_values(value)
         update = False
-        if values.n_value != self._unit.nValue:
-            self._unit.nValue = values.n_value
+        if values.n_value != unit.nValue:
+            unit.nValue = values.n_value
             update = True
-        if values.s_value != self._unit.sValue:
-            self._unit.sValue = values.s_value
+        if values.s_value != unit.sValue:
+            unit.sValue = values.s_value
             update = True
         color = values.color_str()
-        if color and color != self._unit.Color:
-            self._unit.Color = color
+        if color and color != unit.Color:
+            unit.Color = color
             update = True
         if update:
-            self._unit.Update(Log=True)
+            unit.Update(Log=True)

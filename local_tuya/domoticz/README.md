@@ -57,7 +57,7 @@ The role of the manager is to
 #### Unit types
 - [switch](./units/switch.py)
 - [selector switch](./units/selector_switch.py)
-- [temperature](./units/temperature.py)
+- [temperature](./units/temperature.py) (accepts values preprocessor)
 - [set point](./units/set_point.py)
 
 For common units parameters, see the [base](./units/base.py).

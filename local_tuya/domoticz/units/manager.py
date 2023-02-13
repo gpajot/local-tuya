@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Callable, Dict, Generic, Optional, Set, TypeVar
+from weakref import WeakValueDictionary
 
 from local_tuya.device import State
 from local_tuya.domoticz.types import DomoticzUnit
@@ -21,7 +22,9 @@ class UnitManager(Generic[T]):
     ):
         super().__init__()
         self._name = name
-        self._domoticz_units = units
+        self._domoticz_units: WeakValueDictionary[
+            int, DomoticzUnit
+        ] = WeakValueDictionary(units)
         self._included_units = included_units
         self._units: Dict[int, Unit] = {}
         self._value_from_state: Dict[int, Callable[[T], Any]] = {}
