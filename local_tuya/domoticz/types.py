@@ -19,6 +19,8 @@ class DomoticzUnit:
         self.Color: str = ""
         self.Image: Optional[int] = 0
         self.Options: Optional[Dict[str, str]] = None
+        self.Adjustment: Optional[float] = None
+        self.Multiplier: Optional[float] = None
 
     def Create(self) -> None:
         ...

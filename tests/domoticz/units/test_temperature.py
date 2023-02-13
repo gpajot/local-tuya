@@ -14,4 +14,5 @@ def unit_kwargs(mocker):
 
 def test_to_unit_values(unit_kwargs):
     to_unit_values = unit_kwargs["to_unit_values"]
-    assert to_unit_values(10.2) == UnitValues(1, "10.2")
+    assert to_unit_values(10.2, lambda f: f) == UnitValues(1, "10.2")
+    assert to_unit_values(10.2, lambda f: f - 0.1) == UnitValues(1, "10.1")

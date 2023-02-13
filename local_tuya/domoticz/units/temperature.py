@@ -1,4 +1,4 @@
-from local_tuya.domoticz.units.base import Unit, UnitValues
+from local_tuya.domoticz.units.base import AdjustFunc, Unit, UnitValues
 
 
 def temperature_unit(
@@ -6,8 +6,8 @@ def temperature_unit(
     name: str,
     image: int,
 ) -> Unit[float]:
-    def _to_unit_values(value: float) -> UnitValues:
-        return UnitValues(n_value=1, s_value=str(value))
+    def _to_unit_values(value: float, adjust: AdjustFunc) -> UnitValues:
+        return UnitValues(n_value=1, s_value=str(round(adjust(value), 2)))
 
     return Unit(
         id_=id_,

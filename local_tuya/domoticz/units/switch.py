@@ -9,12 +9,12 @@ def switch_unit(
     image: int,
     command_func: Callable[[bool], Awaitable],
 ) -> Unit[bool]:
-    def _to_unit_values(value: bool) -> UnitValues:
+    def _to_unit_values(value: bool, _) -> UnitValues:
         if value:
             return UnitValues(n_value=1, s_value="On")
         return UnitValues(n_value=0, s_value="Off")
 
-    def _command_to_value(command: UnitCommand) -> bool:
+    def _command_to_value(command: UnitCommand, _) -> bool:
         return command.command.lower() == "on"
 
     return Unit(

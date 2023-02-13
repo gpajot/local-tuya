@@ -17,12 +17,12 @@ def unit_kwargs(mocker):
 def test_to_unit_values(unit_kwargs):
     to_unit_values = unit_kwargs["to_unit_values"]
 
-    assert to_unit_values(True) == UnitValues(1, "On")
-    assert to_unit_values(False) == UnitValues(0, "Off")
+    assert to_unit_values(True, None) == UnitValues(1, "On")
+    assert to_unit_values(False, None) == UnitValues(0, "Off")
 
 
 def test_command_to_value(unit_kwargs):
     command_to_value = unit_kwargs["command_to_value"]
 
-    assert command_to_value(UnitCommand("On", 1, "")) is True
-    assert command_to_value(UnitCommand("off", 0, "")) is False
+    assert command_to_value(UnitCommand("On", 1, ""), None) is True
+    assert command_to_value(UnitCommand("off", 0, ""), None) is False

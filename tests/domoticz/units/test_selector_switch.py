@@ -23,17 +23,17 @@ def unit_kwargs(mocker):
 def test_to_unit_values(unit_kwargs):
     to_unit_values = unit_kwargs["to_unit_values"]
 
-    assert to_unit_values(TheEnum.ONE) == UnitValues(1, "10")
-    assert to_unit_values(TheEnum.TWO) == UnitValues(1, "20")
-    assert to_unit_values("something else") == UnitValues(0, "0")
+    assert to_unit_values(TheEnum.ONE, None) == UnitValues(1, "10")
+    assert to_unit_values(TheEnum.TWO, None) == UnitValues(1, "20")
+    assert to_unit_values("something else", None) == UnitValues(0, "0")
 
 
 def test_command_to_value(unit_kwargs):
     command_to_value = unit_kwargs["command_to_value"]
 
-    assert command_to_value(UnitCommand("", 10, "")) is TheEnum.ONE
-    assert command_to_value(UnitCommand("", 20, "")) is TheEnum.TWO
-    assert command_to_value(UnitCommand("", 0, "")) is None
+    assert command_to_value(UnitCommand("", 10, ""), None) is TheEnum.ONE
+    assert command_to_value(UnitCommand("", 20, ""), None) is TheEnum.TWO
+    assert command_to_value(UnitCommand("", 0, ""), None) is None
 
 
 def test_options(unit_kwargs):

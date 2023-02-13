@@ -33,14 +33,14 @@ def selector_switch_unit(
         _level_to_value[i * 10] = e
         labels.append(f"{e.name[0]}{e.name[1:].lower()}")  # type: ignore
 
-    def _to_unit_values(value: T) -> UnitValues:
+    def _to_unit_values(value: T, _) -> UnitValues:
         level = _value_to_level.get(value, 0)
         return UnitValues(
             n_value=1 if level else 0,
             s_value=str(level),
         )
 
-    def _command_to_value(command: UnitCommand) -> Optional[T]:
+    def _command_to_value(command: UnitCommand, _) -> Optional[T]:
         return _level_to_value.get(int(command.level))
 
     return Unit(

@@ -56,6 +56,29 @@ class UnitValues:
         return json.dumps(asdict(self.color))
 
 
+class UnitAdjustment:
+    def __init__(self, unit: DomoticzUnit):
+        self._adjustment = unit.Adjustment
+        self._multiplier = unit.Multiplier
+
+    def adjust_value(self, value: float) -> float:
+        if self._adjustment:
+            value += self._adjustment
+        if self._multiplier:
+            value *= self._multiplier
+        return value
+
+    def adjust_command(self, value: float) -> float:
+        if self._multiplier:
+            value /= self._multiplier
+        if self._adjustment:
+            value -= self._adjustment
+        return value
+
+
+AdjustFunc = Callable[[float], float]
+
+
 T = TypeVar("T")
 
 
@@ -72,9 +95,11 @@ class Unit(Generic[T]):
         # Image ID, see `/json.htm?type=custom_light_icons` in Domoticz.
         image: int,
         # Convert the value of the unit into the Domoticz unit values.
-        to_unit_values: Callable[[T], UnitValues],
+        to_unit_values: Callable[[T, AdjustFunc], UnitValues],
         # Convert a Domoticz command into this units value.
-        command_to_value: Optional[Callable[[UnitCommand], Optional[T]]] = None,
+        command_to_value: Optional[
+            Callable[[UnitCommand, AdjustFunc], Optional[T]]
+        ] = None,
         # Function to call when a unit command is triggered.
         command_func: Optional[Callable[[T], Awaitable]] = None,
         # Options for unit creation.
@@ -113,15 +138,19 @@ class Unit(Generic[T]):
         self._unit = unit
 
     async def on_command(self, command: UnitCommand) -> None:
+        if self._unit is None:
+            raise RuntimeError(f"unit {self.id} {self._name} not registered")
         if self._command_to_value and self._command_func:
-            value = self._command_to_value(command)
+            value = self._command_to_value(
+                command, UnitAdjustment(self._unit).adjust_command
+            )
             if value is not None:
                 await self._command_func(value)
 
     def update(self, value: T) -> None:
         if self._unit is None:
             raise RuntimeError(f"unit {self.id} {self._name} not registered")
-        values = self._to_unit_values(value)
+        values = self._to_unit_values(value, UnitAdjustment(self._unit).adjust_value)
         update = False
         if values.n_value != self._unit.nValue:
             self._unit.nValue = values.n_value

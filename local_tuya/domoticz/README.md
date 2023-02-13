@@ -62,6 +62,9 @@ The role of the manager is to
 
 For common units parameters, see the [base](./units/base.py).
 
+> 💡 When supported, adjusting the unit values in the Domoticz UI has the desired effect.
+> Values will be adjusted when received from the device and before sending commands.
+
 ## Installing the plugin
 You should provide a script that will be used to install the plugin.
 It would look like:

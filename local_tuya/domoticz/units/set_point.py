@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable
 
-from local_tuya.domoticz.units.base import Unit, UnitCommand, UnitValues
+from local_tuya.domoticz.units.base import AdjustFunc, Unit, UnitCommand, UnitValues
 
 
 def set_point_unit(
@@ -9,11 +9,11 @@ def set_point_unit(
     image: int,
     command_func: Callable[[float], Awaitable],
 ) -> Unit[float]:
-    def _to_unit_values(value: float) -> UnitValues:
-        return UnitValues(n_value=1, s_value=str(value))
+    def _to_unit_values(value: float, adjust: AdjustFunc) -> UnitValues:
+        return UnitValues(n_value=1, s_value=str(round(adjust(value), 2)))
 
-    def _command_to_value(command: UnitCommand) -> float:
-        return command.level
+    def _command_to_value(command: UnitCommand, adjust: AdjustFunc) -> float:
+        return adjust(command.level)
 
     return Unit(
         id_=id_,
