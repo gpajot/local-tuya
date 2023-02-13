@@ -2,9 +2,6 @@
 {definition:s}
 """
 
-import sys
-
-from local_tuya.domoticz.plugin.metadata import get_package_metadata
 from local_tuya.domoticz.plugin.plugin import Plugin
 from local_tuya.domoticz.units import UnitCommand
 
@@ -13,10 +10,6 @@ try:
     from {import_path:s} import {unit_ids_name:s}
 except ImportError:
     {unit_ids_name:s} = None
-
-sys.modules[__name__].__doc__ = sys.modules[__name__].__doc__.format(
-    version=get_package_metadata("{package:s}").get("Version", "1.0.0"),
-)
 
 plugin = Plugin(
     package="{package:s}",

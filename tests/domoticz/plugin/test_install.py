@@ -1,6 +1,5 @@
 import contextlib
 import shutil
-import subprocess
 from importlib import import_module
 from pathlib import Path
 from uuid import uuid4
@@ -34,7 +33,7 @@ def path(mocker):
 def metadata(mocker):
     metadata = mocker.Mock(spec=PluginMetadata)
     metadata.package = "local_tuya"
-    metadata.definition.return_value = "test definition {version:s}"
+    metadata.definition.return_value = "test definition"
     return metadata
 
 
@@ -69,11 +68,8 @@ def test_install_plugin(path, metadata, on_start, plugin, plugin_init, plugin_mo
     parameters, devices = object(), object()
     generated_plugin.Parameters = parameters  # type: ignore
     generated_plugin.Devices = devices  # type: ignore
-    version = subprocess.check_output(
-        ["poetry", "version", "--short"], encoding="utf-8"
-    ).strip()
 
-    assert generated_plugin.__doc__ == f"\ntest definition {version}\n"
+    assert generated_plugin.__doc__ == "\ntest definition\n"
     plugin_init.assert_called_once_with(
         package="local_tuya",
         on_start=on_start,

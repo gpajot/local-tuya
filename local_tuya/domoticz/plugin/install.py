@@ -31,8 +31,8 @@ def install_plugin(
     template = (Path(__file__).parent / "template.txt").read_text()
     target.write_text(
         template.format(
-            package=metadata.package,
             definition=metadata.definition(unit_ids),
+            package=metadata.package,
             import_path=import_path,
             on_start_name=on_start.__name__,
             unit_ids_name=unit_ids.__name__ if unit_ids else "__NOOP_UNIT_ID__",
