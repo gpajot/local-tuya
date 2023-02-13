@@ -96,7 +96,9 @@ class Plugin(Generic[T]):
         if self._task_pool:
             self._task_pool.stop()
             self._task_pool = None
-        self._manager = None
+        if self._manager:
+            self._manager.cleanup_domoticz_references()
+            self._manager = None
 
     def on_command(self, unit_id: int, command: UnitCommand) -> None:
         """Send an command to the device asynchronously."""
