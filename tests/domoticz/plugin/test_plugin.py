@@ -105,7 +105,7 @@ def test_start(
 ):
     device.__aenter__.assert_awaited_once()
     domoticz.Heartbeat.assert_called_once_with(15)
-    domoticz.Debugging.assert_called_once_with(4)
+    domoticz.Debugging.assert_called_once_with(0)
     manager_init.assert_called_once_with(
         name="test",
         units=units,
