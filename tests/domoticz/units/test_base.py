@@ -7,7 +7,15 @@ from local_tuya.domoticz.units.base import Unit, UnitCommand, UnitValues
 
 @pytest.fixture()
 def domoticz_unit(mocker):
-    return mocker.patch("local_tuya.domoticz.units.base.DomoticzEx.Unit")
+    return mocker.Mock()
+
+
+@pytest.fixture()
+def domoticz_init(mocker, domoticz_unit):
+    return mocker.patch(
+        "local_tuya.domoticz.units.base.DomoticzEx.Unit",
+        return_value=domoticz_unit,
+    )
 
 
 @pytest.fixture()
@@ -18,7 +26,7 @@ def command_func(mocker):
 
 
 @pytest.fixture()
-def unit(domoticz_unit, command_func):
+def unit(domoticz_init, command_func):
     return Unit(
         id_=1,
         type_="the-type",
@@ -31,9 +39,9 @@ def unit(domoticz_unit, command_func):
     )
 
 
-def test_unit_creation(unit, domoticz_unit):
+def test_unit_creation(unit, domoticz_init):
     unit.ensure(None, "the-device")
-    domoticz_unit.assert_called_once_with(
+    domoticz_init.assert_called_once_with(
         Name="the-device the-unit",
         DeviceID="the-device",
         Unit=1,
@@ -56,14 +64,14 @@ async def test_on_command(unit, command_func):
         command_func.assert_awaited_once_with("cmd-1.1")
 
 
-def test_update(unit):
+def test_update(unit, domoticz_unit):
     unit.ensure(None, "the-device")
 
     unit.update("1")
 
-    assert unit._unit.nValue == 1
-    assert unit._unit.sValue == "1"
-    unit._unit.Update.assert_called_once()
+    assert domoticz_unit.nValue == 1
+    assert domoticz_unit.sValue == "1"
+    domoticz_unit.Update.assert_called_once()
 
 
 def test_update_no_ensured(unit):
