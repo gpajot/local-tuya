@@ -63,7 +63,7 @@ class Unit(Generic[T]):
     def __init__(
         self,
         # ID of the unit in Domoticz.
-        # It has to be unique for the hardware but not across hardwares.
+        # It has to be unique for the hardware but not across hardware.
         id_: int,
         # Domoticz unit type.
         type_: str,

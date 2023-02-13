@@ -41,7 +41,7 @@ This library is composed of two main components:
 - the device
 
 ### Protocol
-The protocol is responsible of handling communication details with the Tuya device.
+The protocol is responsible for handling communication details with the Tuya device.
 Its interface consists of an asynchronous method to update the device and accepts a callback to subscribe to state changes.
 
 See [protocol module](./local_tuya/protocol).
