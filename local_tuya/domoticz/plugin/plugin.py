@@ -53,7 +53,7 @@ class Plugin(Generic[T]):
         )
 
     def _setup_logging(self, debug: bool) -> None:
-        DomoticzEx.Debugging(2 + 4 + 8 if debug else 4)
+        DomoticzEx.Debugging(2 + 4 + 8 if debug else 0)
         # Setup loggers to log in Domoticz.
         for pkg in ("local_tuya", self._package):
             _logger = logging.getLogger(pkg)
