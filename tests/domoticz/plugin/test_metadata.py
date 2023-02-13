@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 from local_tuya.domoticz.plugin.metadata import Option, Parameter, PluginMetadata
@@ -30,4 +31,9 @@ def test_definition():
         ),
     )
     test_file = Path(__file__).parent / "test_metadata.txt"
-    assert metadata.definition(TheUnitId) == test_file.read_text()
+    version = subprocess.check_output(
+        ["poetry", "version", "--short"], encoding="utf-8"
+    ).strip()
+    assert metadata.definition(TheUnitId) == test_file.read_text().format(
+        version=version,
+    )

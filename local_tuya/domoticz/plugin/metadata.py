@@ -94,7 +94,7 @@ class PluginMetadata:
                     "@key": self.package,
                     "@name": self.name,
                     "@author": package_metadata.get("Author", "unknown"),
-                    "@version": "{version:s}",
+                    "@version": package_metadata.get("Version", "1.0.0"),
                     "@wikilink": self.wiki_link,
                     "@externallink": self.external_link
                     or package_metadata.get("Home-page", ""),
