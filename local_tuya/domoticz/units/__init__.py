@@ -8,3 +8,8 @@ from local_tuya.domoticz.units.selector_switch import (
 from local_tuya.domoticz.units.set_point import set_point_unit
 from local_tuya.domoticz.units.switch import switch_unit
 from local_tuya.domoticz.units.temperature import temperature_unit
+from local_tuya.domoticz.units.value_preprocessors import (
+    compose,
+    debounce,
+    moving_average,
+)
