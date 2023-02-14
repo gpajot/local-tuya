@@ -2,6 +2,10 @@
 {definition:s}
 """
 
+# See https://github.com/python/cpython/issues/91375
+import sys
+sys.modules["_asyncio"] = None
+
 from local_tuya.domoticz.plugin.plugin import Plugin
 from local_tuya.domoticz.units import UnitCommand
 

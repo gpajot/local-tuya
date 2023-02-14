@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "local_tuya"
-version = "1.2.2"
+version = "1.2.3"
 description = "Interface to Tuya devices over LAN."
 authors = ["Gabriel Pajot <gab@les-cactus.co>"]
 license = "MIT"
