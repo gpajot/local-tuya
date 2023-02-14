@@ -6,7 +6,7 @@
 
 Interface to Tuya devices over LAN.
 
-Features:
+## Features
 - asynchronous methods and transport
 - persistent communication to the device
 - automatic remote device state updates (remotes can still be used)
@@ -15,6 +15,10 @@ Features:
 - Domoticz plugin using a dedicated thread
 
 > 💡 For now, only v3.3 is supported as I only own devices using this version.
+
+## Examples
+- [local-tuya-ceiling-fan](https://github.com/gpajot/local-tuya-ceiling-fan)
+- [airton-ac](https://github.com/gpajot/airton-ac)
 
 ## Requirements
 To control a device you will need these 3 things:
