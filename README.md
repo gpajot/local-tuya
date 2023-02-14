@@ -10,7 +10,7 @@ Features:
 - asynchronous methods and transport
 - persistent communication to the device
 - automatic remote device state updates (remotes can still be used)
-- configuratble of buffering for subsequent updates
+- configurable buffering for subsequent updates
 - constraints between device commands
 - Domoticz plugin using a dedicated thread
 
