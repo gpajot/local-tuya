@@ -81,7 +81,7 @@ class UpdateBuffer(BackgroundTask):
                     self._updated = None
 
     async def _do_update(self, values: Values) -> None:
-        logger.info("updating device with: %s", values)
+        logger.debug("updating device with: %s", values)
         await self._protocol.update(values)
         if not self._confirm_timeout:
             return

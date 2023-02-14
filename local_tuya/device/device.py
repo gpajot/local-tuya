@@ -56,6 +56,6 @@ class Device(AsyncExitStack, Generic[T]):
 
     async def _state_updated_callback(self, values: Values) -> None:
         state = self._load_state(values)
-        logger.info("received new device state: %s", state)
+        logger.debug("received new device state: %s", state)
         if self._state_updated_callback_func:
             await self._state_updated_callback_func(state)
