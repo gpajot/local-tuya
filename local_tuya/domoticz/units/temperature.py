@@ -12,7 +12,7 @@ def temperature_unit(
 ) -> Unit[float]:
     def _to_unit_values(value: float) -> UnitValues:
         value = value if not value_preprocessor else value_preprocessor(value)
-        return UnitValues(n_value=1, s_value=str(round(value, 2)))
+        return UnitValues(n_value=1, s_value=str(round(value, 1)))
 
     return Unit(
         id_=id_,

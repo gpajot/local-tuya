@@ -10,7 +10,7 @@ def set_point_unit(
     command_func: Callable[[float], Awaitable],
 ) -> Unit[float]:
     def _to_unit_values(value: float) -> UnitValues:
-        return UnitValues(n_value=1, s_value=str(round(value, 2)))
+        return UnitValues(n_value=1, s_value=str(round(value, 1)))
 
     def _command_to_value(command: UnitCommand) -> float:
         return command.level
