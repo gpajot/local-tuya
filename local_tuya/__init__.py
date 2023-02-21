@@ -15,6 +15,6 @@ from local_tuya.errors import (
     LocalTuyaError,
     ResponseError,
 )
-from local_tuya.protocol import ProtocolConfig, Values
+from local_tuya.protocol import ProtocolConfig, Values, Version
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
