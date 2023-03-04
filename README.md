@@ -56,4 +56,4 @@ The device handles higher level functional logic such as buffering, constraints 
 See [device module](./local_tuya/device).
 
 ## Domoticz plugin tools
-See [Domoticz module](./local_tuya/domoticz).
+See [Domoticz tools package](https://github.com/gpajot/local-tuya-domoticz-tools).
