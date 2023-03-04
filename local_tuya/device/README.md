@@ -8,9 +8,9 @@ As an example, to forbid setting turbo mode of a fan on eco mode:
 ```python
 from local_tuya import Constraint
 constraint = Constraint(
-    DataPoint.FAN,
-    (DataPoint.ECO, {True}),
-    restrict_to={FanSpeed.TURBO},
+    DataPoint.ECO,
+    True,
+    (DataPoint.FAN, {FanSpeed.TURBO}),
 )
 ```
 

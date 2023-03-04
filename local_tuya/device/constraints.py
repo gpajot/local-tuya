@@ -3,51 +3,54 @@ from typing import Dict, Optional, Set, Tuple
 from local_tuya.device.enums import DataPoint
 from local_tuya.protocol import Value, Values
 
+Blacklist = Dict[str, Optional[Set[Value]]]
+_Blacklist = Dict[str, Set[Value]]
+
 
 class Constraint:
-    """The data point is constrained if any of the exclusions is active."""
+    """Represents other values that cannot be applied if the datapoint/value is set."""
 
     def __init__(
         self,
         data_point: DataPoint,
-        # An exclusion is active if its datapoint is in the set of values.
-        *exclusions: Tuple[DataPoint, Set[Value]],
-        # Only check the constraint if the data point is in those values.
-        restrict_to: Optional[Set[Value]] = None,
+        value: Value,
+        *blacklist: Tuple[DataPoint, Optional[Set[Value]]],
     ):
-        self.data_point = data_point
-        self._exclusions: Dict[str, Set[Value]] = {
-            data_point: values for data_point, values in exclusions
-        }
-        self._restrict_to = restrict_to
+        self._data_point = data_point
+        self._value = value
+        self._blacklist: Blacklist = {dp: v for dp, v in blacklist}
 
-    def applicable(self, value: Value) -> bool:
-        """Return whether the constraint should be checked."""
-        return self._restrict_to is None or value in self._restrict_to
-
-    def ko(self, values: Values) -> bool:
-        """Returns whether an exclusion applies on the given values."""
-        return any(
-            v in self._exclusions[k] for k, v in values.items() if k in self._exclusions
-        )
+    def blacklist(self, values: Values) -> Blacklist:
+        if values[self._data_point] != self._value:
+            return {}
+        return self._blacklist
 
 
 class Constraints:
-    """Set of constraints for a device that forbids certain commands."""
+    """Represent all constraints for a given device."""
 
     def __init__(self, *constraints: Constraint):
-        self._constraints: Dict[str, Constraint] = {
-            constraint.data_point: constraint for constraint in constraints
-        }
+        self._constraints = constraints
+
+    def _blacklist(self, values: Values) -> _Blacklist:
+        blacklist: _Blacklist = {}
+        for constraint in self._constraints:
+            for k, v in constraint.blacklist(values).items():
+                if k not in blacklist:
+                    blacklist[k] = set()
+                if v:
+                    blacklist[k] |= v
+        return blacklist
 
     def filter_values(self, values: Values, current: Values) -> Values:
         """Filter values that can be updated given the device constraints."""
         # Check on merged values.
-        merged = {**current, **values}
+        blacklist = self._blacklist({**current, **values})
         filtered: Values = {}
         for data_point, value in values.items():
-            constraint = self._constraints.get(data_point)
-            if constraint and constraint.applicable(value) and constraint.ko(merged):
+            if data_point in blacklist and (
+                not blacklist[data_point] or value in blacklist[data_point]
+            ):
                 continue
             filtered[data_point] = value
         return filtered
