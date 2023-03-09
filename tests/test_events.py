@@ -1,7 +1,4 @@
-import sys
 import types
-
-import pytest
 
 from local_tuya.events import Event, EventNotifier
 
@@ -14,10 +11,6 @@ class Event2(Event):
     ...
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 8),
-    reason="requires python3.8 or higher for AsyncMock",
-)
 async def test_event_notifier(mocker):
     listener1 = mocker.Mock()
     listener2 = mocker.Mock()

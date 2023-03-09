@@ -1,5 +1,4 @@
 import asyncio
-import sys
 
 import pytest
 
@@ -8,10 +7,6 @@ from local_tuya.device.state import StateHandler
 from local_tuya.protocol import Protocol
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 8),
-    reason="requires python3.8 or higher for AsyncMock",
-)
 class TestUpdateBuffer:
     @pytest.fixture()
     def protocol(self, mocker):
