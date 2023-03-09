@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "local_tuya"
-version = "2.0.0"
+version = "2.1.0"
 description = "Interface to Tuya devices over LAN."
 authors = ["Gabriel Pajot <gab@les-cactus.co>"]
 license = "MIT"
@@ -9,10 +9,10 @@ repository = "https://github.com/gpajot/local-tuya"
 include = ["local_tuya/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.12"
+python = ">=3.8"
 
 pycryptodomex = ">=3,<4"
-concurrent-tasks = ">=1.3,<2"
+concurrent-tasks = ">=1.4,<2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "==7.2.2"
@@ -21,7 +21,7 @@ pytest-mock = "==3.10.0"
 ruff = "==0.0.254"
 mypy = "==1.1.1"
 black = "==23.1.0"
-pre-commit = "==2.21.0"
+pre-commit = "==3.1.1"
 
 [build-system]
 requires = ["poetry-core"]
