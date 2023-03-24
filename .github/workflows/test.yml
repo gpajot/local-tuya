@@ -26,7 +26,7 @@ jobs:
       - name: Install poetry
         run: pip install poetry==1.*
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --all-extras
       - name: Run black
         run: poetry run black . --check
       - name: Run ruff
