@@ -16,7 +16,7 @@ concurrent-tasks = ">=1.4,<2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "==7.4.0"
-pytest-asyncio = "==0.21.0"
+pytest-asyncio = "==0.21.1"
 pytest-mock = "==3.11.1"
 ruff = "==0.0.280"
 mypy = "==1.4.1"
