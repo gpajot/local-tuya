@@ -34,7 +34,7 @@ class UpdateBuffer(BackgroundTask):
         self._updated: Optional[asyncio.Future[None]] = None
 
     def __enter__(self) -> "UpdateBuffer":
-        # Don't start the background task.
+        """Don't start automatically."""
         return self
 
     async def update(self, values: Values) -> None:

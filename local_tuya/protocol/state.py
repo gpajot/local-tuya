@@ -1,8 +1,7 @@
-import asyncio
 import logging
 from typing import Optional
 
-from concurrent_tasks import BackgroundTask
+from concurrent_tasks import PeriodicTask
 
 from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
@@ -23,13 +22,13 @@ from local_tuya.protocol.message import (
 logger = logging.getLogger(__name__)
 
 
-class State(BackgroundTask):
+class State(PeriodicTask):
     def __init__(
         self,
         refresh_interval: float,
         event_notifier: EventNotifier,
     ):
-        super().__init__(self._refresh, refresh_interval)
+        super().__init__(refresh_interval, self._refresh)
         event_notifier.register(ResponseReceived, self._update)
         event_notifier.register(ConnectionLost, lambda _: self.cancel())
         event_notifier.register(ConnectionEstablished, lambda _: self.create())
@@ -37,16 +36,15 @@ class State(BackgroundTask):
         self._state: Optional[Values] = None
 
     def __enter__(self) -> "State":
+        """Don't start automatically, only when connection is established."""
         return self
 
-    async def _refresh(self, interval: float) -> None:
-        while True:
-            logger.debug("refreshing device state")
-            try:
-                await self._notifier.emit(CommandSent(StateCommand()))
-            except CommandTimeoutError:
-                logger.warning("timeout waiting for state response")
-            await asyncio.sleep(interval)
+    async def _refresh(self) -> None:
+        logger.debug("refreshing device state")
+        try:
+            await self._notifier.emit(CommandSent(StateCommand()))
+        except CommandTimeoutError:
+            logger.warning("timeout waiting for state response")
 
     async def _update(self, event: ResponseReceived) -> None:
         if event.response.error:
