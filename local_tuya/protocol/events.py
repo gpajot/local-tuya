@@ -5,8 +5,7 @@ from local_tuya.events import Event
 from local_tuya.protocol.message import Command, Response, Values
 
 
-class ConnectionEstablished(Event):
-    ...
+class ConnectionEstablished(Event): ...
 
 
 @dataclass
@@ -14,12 +13,10 @@ class ConnectionLost(Event):
     error: Optional[Exception]
 
 
-class DataSent(bytes, Event):
-    ...
+class DataSent(bytes, Event): ...
 
 
-class DataReceived(bytes, Event):
-    ...
+class DataReceived(bytes, Event): ...
 
 
 @dataclass
