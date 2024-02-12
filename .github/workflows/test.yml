@@ -28,10 +28,10 @@ jobs:
         run: pip install poetry==1.*
       - name: Install dependencies
         run: poetry install --all-extras
-      - name: Run black
-        run: poetry run black . --check
-      - name: Run ruff
-        run: poetry run ruff .
+      - name: Run format
+        run: poetry run ruff format --check .
+      - name: Run lint
+        run: poetry run ruff check .
       - name: Run mypy
         run: poetry run mypy .
       - name: Run tests
