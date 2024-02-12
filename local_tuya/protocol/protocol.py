@@ -19,7 +19,7 @@ from local_tuya.protocol.transport import Transport
 
 
 def _state_updated_callback(
-    func: Callable[[Values], Awaitable]
+    func: Callable[[Values], Awaitable],
 ) -> Callable[[StateUpdated], Awaitable]:
     async def _wrapper(event: StateUpdated) -> None:
         await func(event.values)
