@@ -3,10 +3,12 @@ import types
 from local_tuya.events import Event, EventNotifier
 
 
-class Event1(Event): ...
+class Event1(Event):
+    ...
 
 
-class Event2(Event): ...
+class Event2(Event):
+    ...
 
 
 async def test_event_notifier(mocker):
