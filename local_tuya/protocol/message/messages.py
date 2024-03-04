@@ -37,12 +37,10 @@ class EmptyResponse:
         return self._error
 
 
-class HeartbeatCommand(EmptyCommand):
-    ...
+class HeartbeatCommand(EmptyCommand): ...
 
 
-class HeartbeatResponse(EmptyResponse):
-    ...
+class HeartbeatResponse(EmptyResponse): ...
 
 
 class StatusResponse:
@@ -59,12 +57,10 @@ class StatusResponse:
             self.error = DecodeResponseError("no dps in response")
 
 
-class StateCommand(EmptyCommand):
-    ...
+class StateCommand(EmptyCommand): ...
 
 
-class StateResponse(StatusResponse):
-    ...
+class StateResponse(StatusResponse): ...
 
 
 @dataclass
@@ -76,5 +72,4 @@ class UpdateCommand:
         return {"dps": self.values}
 
 
-class UpdateResponse(EmptyResponse):
-    ...
+class UpdateResponse(EmptyResponse): ...
