@@ -1,8 +1,8 @@
 # local-tuya
 
-[![tests](https://github.com/gpajot/local-tuya/workflows/Test/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions?query=workflow%3ATest+branch%3Amain+event%3Apush)
-[![version](https://img.shields.io/pypi/v/local-tuya?label=stable)](https://pypi.org/project/local-tuya/)
-[![python](https://img.shields.io/pypi/pyversions/local-tuya)](https://pypi.org/project/local-tuya/)
+[![tests](https://github.com/gpajot/local-tuya/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
+[![version](https://img.shields.io/pypi/v/local_tuya?label=stable)](https://pypi.org/project/local_tuya/)
+[![python](https://img.shields.io/pypi/pyversions/local_tuya)](https://pypi.org/project/local_tuya/)
 
 Interface to Tuya devices over LAN.
 
