@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "local_tuya"
-version = "2.2.0"
+version = "2.2.1"
 description = "Interface to Tuya devices over LAN."
 authors = ["Gabriel Pajot <gab@les-cactus.co>"]
 license = "MIT"
@@ -13,6 +13,7 @@ python = ">=3.8"
 
 pycryptodomex = ">=3,<4"
 concurrent-tasks = ">=1.6,<2"
+typing-extensions = ">=4.10"
 
 [tool.poetry.group.test.dependencies]
 pytest = "==8.1.1"
