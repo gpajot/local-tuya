@@ -24,14 +24,17 @@ files = [
 
 [[package]]
 name = "concurrent-tasks"
-version = "1.7.0"
+version = "1.7.1"
 description = "Tools to run asyncio tasks concurrently."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "concurrent_tasks-1.7.0-py3-none-any.whl", hash = "sha256:a43178d8dee2d7c8f0b4129180488badad7649441c314d79d588cb4dad60f158"},
-    {file = "concurrent_tasks-1.7.0.tar.gz", hash = "sha256:bc58f6e5f0f35b8d3858cd22a310bc3b4ef5a2f82dfd81496657109ceb165a44"},
+    {file = "concurrent_tasks-1.7.1-py3-none-any.whl", hash = "sha256:814fdd4f1fcc32877a48c10f89bbcca50a17e18c50edb79063a9447c151d941e"},
+    {file = "concurrent_tasks-1.7.1.tar.gz", hash = "sha256:cf2cbf915c282e61a84ee1016bacc8058837a563afc2ad258db31bdeb19b53ca"},
 ]
+
+[package.dependencies]
+typing-extensions = ">=4.10"
 
 [[package]]
 name = "distlib"
