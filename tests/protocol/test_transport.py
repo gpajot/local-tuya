@@ -1,4 +1,5 @@
 import asyncio.transports
+import inspect
 import sys
 
 import pytest
@@ -10,7 +11,7 @@ from local_tuya.protocol.events import (
     DataReceived,
     DataSent,
 )
-from local_tuya.protocol.transport import Transport
+from local_tuya.protocol.transport import Transport, _get_host
 
 
 class TestTransport:
@@ -87,3 +88,22 @@ class TestTransport:
             await asyncio.sleep(0)  # context switch.
             assert_event_emitted(ConnectionLost(error), 1)
             assert_event_emitted(ConnectionEstablished(), 2)
+
+
+@pytest.mark.parametrize(
+    ("address", "mock_stdout", "expected"),
+    [
+        ("192.168.1.2", b"", "192.168.1.2"),
+        ("f6:bc:2e:be:de:44", b"", ValueError),
+        ("f6:bc:2e:be:de:44", b"192.168.1.2\n", "192.168.1.2"),
+        ("something-else", b"", "something-else"),
+    ],
+)
+async def test_get_host(address, mock_stdout, expected, mocker):
+    create_subprocess_mock = mocker.patch("asyncio.create_subprocess_shell")
+    create_subprocess_mock.return_value.communicate.return_value = (mock_stdout, "")
+    if inspect.isclass(expected) and issubclass(expected, Exception):
+        with pytest.raises(expected):
+            await _get_host(address)
+    else:
+        assert await _get_host(address) == expected

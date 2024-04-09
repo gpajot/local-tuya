@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from typing import Optional, cast
 
 from concurrent_tasks import BackgroundTask
@@ -75,7 +76,7 @@ class Transport(asyncio.Protocol):
                 try:
                     transport, _ = await asyncio.get_running_loop().create_connection(
                         lambda: self,
-                        self._address,
+                        await _get_host(self._address),
                         self._port,
                     )
                     return cast(asyncio.transports.WriteTransport, transport)
@@ -115,3 +116,18 @@ class Transport(asyncio.Protocol):
         await self._connected.wait()
         # Writing is asynchronous, errors will be raised through the `connection_lost` method.
         cast(asyncio.transports.WriteTransport, self._transport).write(data)
+
+
+async def _get_host(address: str) -> str:
+    """Resolve MAC to IP if given."""
+    if re.match(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", address):
+        process = await asyncio.create_subprocess_shell(
+            f"arp -n | grep -w -i '{address}' | awk '{{print $1}}'",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await process.communicate()
+        if not stdout:
+            raise ValueError(f"no device found for MAC {address}")
+        return stdout.decode().strip()
+    return address
