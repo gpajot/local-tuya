@@ -1,6 +1,5 @@
 import asyncio.transports
 import inspect
-import sys
 
 import pytest
 
@@ -31,16 +30,10 @@ class TestTransport:
     def mock_transport(self, mocker, transport, transport_future):
         mock = mocker.Mock(spec=asyncio.transports.WriteTransport)
 
-        if sys.version_info < (3, 8):
-            mocker.patch.object(
-                transport, "_get_transport", return_value=transport_future
-            )
-        else:
+        async def _get_transport():
+            return await transport_future
 
-            async def _get_transport():
-                return await transport_future
-
-            mocker.patch.object(transport, "_get_transport", new=_get_transport)
+        mocker.patch.object(transport, "_get_transport", new=_get_transport)
         mock.close.side_effect = lambda: transport._closed.set()
         return mock
 
