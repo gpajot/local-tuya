@@ -6,6 +6,7 @@ from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionBroken,
     ConnectionEstablished,
     ConnectionLost,
 )
@@ -30,3 +31,6 @@ async def _heartbeat(event_notifier: EventNotifier) -> None:
         await event_notifier.emit(CommandSent(HeartbeatCommand()))
     except CommandTimeoutError:
         logger.warning("timeout waiting for heartbeat response")
+        # This would typically happen when connection succeeded,
+        # but it is impossible to communicate.
+        await event_notifier.emit(ConnectionBroken())

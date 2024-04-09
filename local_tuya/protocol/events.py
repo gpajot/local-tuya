@@ -13,6 +13,9 @@ class ConnectionLost(Event):
     error: Optional[Exception]
 
 
+class ConnectionBroken(Event): ...
+
+
 class DataSent(bytes, Event): ...
 
 
