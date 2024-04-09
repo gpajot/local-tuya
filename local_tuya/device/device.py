@@ -20,6 +20,7 @@ class Device(AsyncExitStack, Generic[T]):
         config: DeviceConfig,
         load_state: Callable[[Values], T],
         state_updated_callback: Optional[Callable[[T], Any]] = None,
+        connection_broken_callback: Optional[Callable[[], Any]] = None,
         constraints: Optional[Constraints] = None,
     ):
         super().__init__()
@@ -27,10 +28,16 @@ class Device(AsyncExitStack, Generic[T]):
         self._state_updated_callback_func: Optional[Callable[[T], Awaitable]] = (
             maybe_async(state_updated_callback) if state_updated_callback else None
         )
+        self._connection_broken_callback_func: Optional[Callable[[], Awaitable]] = (
+            maybe_async(connection_broken_callback)
+            if connection_broken_callback
+            else None
+        )
         self._state_handler = StateHandler(self._state_updated_callback)
         self._protocol = Protocol(
             config.protocol,
             self._state_handler.updated,
+            connection_broken_callback=self._connection_broken_callback,
         )
         self._buffer = UpdateBuffer(
             delay=config.debounce_updates,
@@ -48,6 +55,9 @@ class Device(AsyncExitStack, Generic[T]):
     def set_state_updated_callback(self, callback: Callable[[T], Any]) -> None:
         self._state_updated_callback_func = maybe_async(callback)
 
+    def set_connection_broken_callback(self, callback: Callable[[], Any]) -> None:
+        self._connection_broken_callback_func = maybe_async(callback)
+
     async def _state(self) -> T:
         return self._load_state(await self._state_handler.state())
 
@@ -59,3 +69,7 @@ class Device(AsyncExitStack, Generic[T]):
         logger.debug("received new device state: %s", state)
         if self._state_updated_callback_func:
             await self._state_updated_callback_func(state)
+
+    async def _connection_broken_callback(self) -> None:
+        if self._connection_broken_callback_func:
+            await self._connection_broken_callback_func()
