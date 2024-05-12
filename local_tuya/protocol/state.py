@@ -7,8 +7,8 @@ from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     ResponseReceived,
     StateUpdated,
 )
@@ -30,7 +30,7 @@ class State(PeriodicTask):
     ):
         super().__init__(refresh_interval, self._refresh)
         event_notifier.register(ResponseReceived, self._update)
-        event_notifier.register(ConnectionLost, lambda _: self.cancel())
+        event_notifier.register(ConnectionClosed, lambda _: self.cancel())
         event_notifier.register(ConnectionEstablished, lambda _: self.create())
         self._notifier = event_notifier
         self._state: Optional[Values] = None

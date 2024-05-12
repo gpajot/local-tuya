@@ -10,8 +10,8 @@ from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     DataSent,
     ResponseReceived,
 )
@@ -28,7 +28,7 @@ class Sender(AbstractAsyncContextManager):
         timeout: float,
     ):
         event_notifier.register(ConnectionEstablished, self._connection_established)
-        event_notifier.register(ConnectionLost, self._connection_lost)
+        event_notifier.register(ConnectionClosed, self._connection_lost)
         event_notifier.register(ResponseReceived, self._receive_response)
         event_notifier.register(CommandSent, self._send)
         self._notifier = event_notifier
@@ -50,7 +50,7 @@ class Sender(AbstractAsyncContextManager):
         for task in self._pending_tasks.values():
             task.start()
 
-    def _connection_lost(self, _: ConnectionLost) -> None:
+    def _connection_lost(self, _: ConnectionClosed) -> None:
         self._can_send = False
         for task in self._pending_tasks.values():
             task.cancel()

@@ -8,10 +8,11 @@ from concurrent_tasks import BackgroundTask
 from local_tuya.backoff import Backoff
 from local_tuya.events import EventNotifier
 from local_tuya.protocol.events import (
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     DataReceived,
     DataSent,
+    ResponseReceived,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,19 +24,23 @@ class Transport(asyncio.Protocol):
         address: str,
         port: int,
         backoff: Backoff,
+        timeout: float,
         event_notifier: EventNotifier,
     ):
         event_notifier.register(DataSent, self._write)
-        self._notifier = event_notifier
+        event_notifier.register(ResponseReceived, self._connection_live)
         self._address = address
         self._port = port
+        self._backoff = backoff
+        self._timeout = timeout
+        self._notifier = event_notifier
+
         self._transport: Optional[asyncio.transports.WriteTransport] = None
         self._closing = False
         self._closed = asyncio.Event()
         self._closed.set()
         self._close_exc: Optional[Exception] = None
         self._connected = asyncio.Event()
-        self._backoff = backoff
         self._connect_task = BackgroundTask(self._connect)
         self._receive_task = BackgroundTask(self._receive)
         # We need a queue as `data_received` is not async.
@@ -43,7 +48,7 @@ class Transport(asyncio.Protocol):
 
     async def __aenter__(self):
         self._closed.clear()
-        await self._connect_task.create()
+        self._connect_task.create()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -51,38 +56,42 @@ class Transport(asyncio.Protocol):
         self._connect_task.cancel()
         self._receive_task.cancel()
         if self._transport:
+            await self._notifier.emit(ConnectionClosed(None))
             self._transport.close()
             # Wait until `connection_lost` was called.
             try:
-                await asyncio.wait_for(self._closed.wait(), timeout=10)
-                await self._notifier.emit(ConnectionLost(None))
+                await asyncio.wait_for(self._closed.wait(), timeout=self._timeout)
             except asyncio.TimeoutError:
                 logger.error("timeout waiting for transport to close")
 
     async def _connect(self) -> None:
+        # Handle errors here as `connection_lost` is not async.
         if self._close_exc:
             exc = self._close_exc
             self._close_exc = None
-            await self._notifier.emit(ConnectionLost(exc))
-        self._transport = await self._get_transport()
+            await self._notifier.emit(ConnectionClosed(exc))
+        while True:
+            await self._backoff.wait()
+            try:
+                self._transport = await self._get_transport()
+                break
+            except Exception:
+                logger.warning("could not connect, retrying...", exc_info=True)
         self._connected.set()
         logger.info("connected to device %s:%i", self._address, self._port)
         await self._notifier.emit(ConnectionEstablished())
         self._receive_task.create()
 
     async def _get_transport(self) -> asyncio.transports.WriteTransport:
-        with self._backoff as backoff:
-            while True:
-                try:
-                    transport, _ = await asyncio.get_running_loop().create_connection(
-                        lambda: self,
-                        await _get_host(self._address),
-                        self._port,
-                    )
-                    return cast(asyncio.transports.WriteTransport, transport)
-                except Exception:
-                    logger.warning("could not connect, retrying...", exc_info=True)
-                    await backoff()
+        transport, _ = await asyncio.wait_for(
+            asyncio.get_running_loop().create_connection(
+                lambda: self,
+                await _get_host(self._address),
+                self._port,
+            ),
+            self._timeout,
+        )
+        return cast(asyncio.transports.WriteTransport, transport)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         self._close_exc = exc
@@ -99,6 +108,13 @@ class Transport(asyncio.Protocol):
             self._transport = None
             self._received_bytes = asyncio.Queue()
             self._connect_task.create()
+
+    def _connection_live(self, _: ResponseReceived) -> None:
+        # While this event has not been received, we assume the connection is not necessarily healthy.
+        # It is possible to be connected and not be able to communicated with the device.
+        # We assume the connection to be healthy we can receive responses.
+        # As long as it is unhealthy, connection attempts will increase the backoff.
+        self._backoff.reset()
 
     def data_received(self, data: bytes) -> None:
         self._received_bytes.put_nowait(data)

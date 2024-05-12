@@ -4,8 +4,8 @@ import pytest
 
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     ResponseReceived,
     StateUpdated,
 )
@@ -27,7 +27,7 @@ class TestState:
             await notifier.emit(ConnectionEstablished())
             await asyncio.sleep(0.005)
             assert_event_emitted(CommandSent(StateCommand()), 1)
-            await notifier.emit(ConnectionLost(None))
+            await notifier.emit(ConnectionClosed(None))
             notifier_spy.reset_mock()
             await asyncio.sleep(0.015)
             notifier_spy.assert_not_called()

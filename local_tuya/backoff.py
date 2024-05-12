@@ -6,9 +6,16 @@ from contextlib import AbstractContextManager
 class Backoff(AbstractContextManager, ABC):
     """Can be used to wait according to a strategy until exited."""
 
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.reset()
+
     @abstractmethod
-    async def __call__(self) -> None:
+    async def wait(self) -> None:
         """Wait according to the backoff strategy."""
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset the backoff."""
 
 
 class SequenceBackoff(Backoff):
@@ -17,17 +24,17 @@ class SequenceBackoff(Backoff):
 
     >>> with Backoff(1, 5, 10) as backoff:
     >>>     ...
-    >>>     await backoff()
+    >>>     await backoff.wait()
     """
 
     def __init__(self, *sequence: float):
         self.__seq = tuple(sequence)
         self.__index = 0
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def reset(self) -> None:
         self.__index = 0
 
-    async def __call__(self) -> None:
+    async def wait(self) -> None:
         await asyncio.sleep(self.__seq[self.__index])
         if self.__index < len(self.__seq) - 1:
             self.__index += 1

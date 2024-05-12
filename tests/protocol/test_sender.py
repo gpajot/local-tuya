@@ -6,8 +6,8 @@ import pytest_asyncio
 from local_tuya.errors import CommandTimeoutError, ResponseError
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     DataSent,
     ResponseReceived,
 )
@@ -65,7 +65,7 @@ class TestSender:
         await notifier.emit(ConnectionEstablished())
         task = asyncio.create_task(notifier.emit(command_sent))
         await asyncio.sleep(0.001)  # context switch
-        await notifier.emit(ConnectionLost(None))
+        await notifier.emit(ConnectionClosed(None))
         await asyncio.sleep(0.015)
         await notifier.emit(ConnectionEstablished())
         await asyncio.sleep(0.001)  # context switch

@@ -9,11 +9,8 @@ class ConnectionEstablished(Event): ...
 
 
 @dataclass
-class ConnectionLost(Event):
+class ConnectionClosed(Event):
     error: Optional[Exception]
-
-
-class ConnectionBroken(Event): ...
 
 
 class DataSent(bytes, Event): ...

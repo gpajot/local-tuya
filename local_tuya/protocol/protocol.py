@@ -1,10 +1,10 @@
 import asyncio
 from contextlib import AsyncExitStack
-from typing import Any, Awaitable, Callable, Optional
+from typing import Awaitable, Callable, Optional
 
 from local_tuya.events import EventNotifier
 from local_tuya.protocol.config import ProtocolConfig
-from local_tuya.protocol.events import CommandSent, ConnectionBroken, StateUpdated
+from local_tuya.protocol.events import CommandSent, StateUpdated
 from local_tuya.protocol.heartbeat import Heartbeat
 from local_tuya.protocol.message import (
     MessageHandler,
@@ -27,21 +27,11 @@ def _state_updated_callback(
     return _wrapper
 
 
-def _connection_broken_callback(
-    func: Callable[[], Any],
-) -> Callable[[ConnectionBroken], Any]:
-    async def _wrapper(_: ConnectionBroken) -> None:
-        await func()
-
-    return _wrapper
-
-
 class Protocol(asyncio.Protocol, AsyncExitStack):
     def __init__(
         self,
         config: ProtocolConfig,
         state_updated_callback: Optional[Callable[[Values], Awaitable]] = None,
-        connection_broken_callback: Optional[Callable[[], Any]] = None,
     ):
         super().__init__()
         self._config = config
@@ -51,16 +41,12 @@ class Protocol(asyncio.Protocol, AsyncExitStack):
                 StateUpdated,
                 _state_updated_callback(state_updated_callback),
             )
-        if connection_broken_callback:
-            self._event_notifier.register(
-                ConnectionBroken,
-                _connection_broken_callback(connection_broken_callback),
-            )
         message_handler: MessageHandler = get_handler(config)
         self._transport = Transport(
             address=config.address,
             port=config.port,
             backoff=config.connection_backoff,
+            timeout=config.timeout,
             event_notifier=self._event_notifier,
         )
         self._sender = Sender(

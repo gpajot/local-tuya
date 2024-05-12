@@ -8,7 +8,7 @@ Interface to Tuya devices over LAN.
 
 ## Features
 - asynchronous methods and transport
-- persistent communication to the device
+- persistent and robust communication to the device
 - automatic remote device state updates (remotes can still be used)
 - configurable buffering for subsequent updates
 - constraints between device commands

@@ -1,6 +1,6 @@
 import pytest
 
-from local_tuya.protocol.events import ConnectionLost, DataReceived, ResponseReceived
+from local_tuya.protocol.events import ConnectionClosed, DataReceived, ResponseReceived
 from local_tuya.protocol.message import MessageHandler, UpdateCommand, UpdateResponse
 from local_tuya.protocol.receiver import Receiver
 
@@ -18,7 +18,7 @@ class TestReceiver:
         msg_handler.unpack.side_effect = lambda d: (0, None, None, d)
         await notifier.emit(DataReceived(b"\x00"))
         await notifier.emit(DataReceived(b"\x00"))
-        await notifier.emit(ConnectionLost(None))
+        await notifier.emit(ConnectionClosed(None))
         msg_handler.unpack.side_effect = lambda d: (0, None, None, b"")
         await notifier.emit(DataReceived(b"\x00"))
         await notifier.emit(DataReceived(b"\x00"))

@@ -18,7 +18,7 @@ class ProtocolConfig:
     port: int = 6668
     version: Version = Version.v33
     # How long to wait between reconnection attempts.
-    connection_backoff: Backoff = SequenceBackoff(1, 5, 10, 30, 60, 300)
+    connection_backoff: Backoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
     # Seconds to wait until command can be confirmed.
     # This excludes time waiting for the connection to be established.
     timeout: float = 5
