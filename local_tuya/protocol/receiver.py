@@ -1,7 +1,7 @@
 import logging
 
 from local_tuya.events import EventNotifier
-from local_tuya.protocol.events import ConnectionLost, DataReceived, ResponseReceived
+from local_tuya.protocol.events import ConnectionClosed, DataReceived, ResponseReceived
 from local_tuya.protocol.message import MessageHandler
 
 logger = logging.getLogger(__name__)
@@ -14,12 +14,12 @@ class Receiver:
         event_notifier: EventNotifier,
     ):
         event_notifier.register(DataReceived, self._receive_messages)
-        event_notifier.register(ConnectionLost, self._reset)
+        event_notifier.register(ConnectionClosed, self._reset)
         self._handler = message_handler
         self._notifier = event_notifier
         self._buffer = b""
 
-    def _reset(self, _: ConnectionLost) -> None:
+    def _reset(self, _: ConnectionClosed) -> None:
         self._buffer = b""
 
     async def _receive_messages(self, data: DataReceived) -> None:

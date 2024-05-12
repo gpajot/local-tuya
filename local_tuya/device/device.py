@@ -1,6 +1,9 @@
 import logging
 from contextlib import AsyncExitStack
 from typing import Any, Awaitable, Callable, Generic, Optional, TypeVar
+from warnings import warn
+
+from typing_extensions import deprecated
 
 from local_tuya.device.buffer import UpdateBuffer
 from local_tuya.device.config import DeviceConfig
@@ -23,21 +26,21 @@ class Device(AsyncExitStack, Generic[T]):
         connection_broken_callback: Optional[Callable[[], Any]] = None,
         constraints: Optional[Constraints] = None,
     ):
+        if connection_broken_callback is not None:
+            warn(
+                "Parameter `connection_broken_callback` of local_tuya.Device will be removed.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         super().__init__()
         self._load_state = load_state
         self._state_updated_callback_func: Optional[Callable[[T], Awaitable]] = (
             maybe_async(state_updated_callback) if state_updated_callback else None
         )
-        self._connection_broken_callback_func: Optional[Callable[[], Awaitable]] = (
-            maybe_async(connection_broken_callback)
-            if connection_broken_callback
-            else None
-        )
         self._state_handler = StateHandler(self._state_updated_callback)
         self._protocol = Protocol(
             config.protocol,
             self._state_handler.updated,
-            connection_broken_callback=self._connection_broken_callback,
         )
         self._buffer = UpdateBuffer(
             delay=config.debounce_updates,
@@ -52,11 +55,12 @@ class Device(AsyncExitStack, Generic[T]):
         self.enter_context(self._buffer)
         return self
 
+    @deprecated(
+        "Method local_tuya.Device.set_state_updated_callback will be removed.",
+        stacklevel=2,
+    )
     def set_state_updated_callback(self, callback: Callable[[T], Any]) -> None:
         self._state_updated_callback_func = maybe_async(callback)
-
-    def set_connection_broken_callback(self, callback: Callable[[], Any]) -> None:
-        self._connection_broken_callback_func = maybe_async(callback)
 
     async def _state(self) -> T:
         return self._load_state(await self._state_handler.state())
@@ -69,7 +73,3 @@ class Device(AsyncExitStack, Generic[T]):
         logger.debug("received new device state: %s", state)
         if self._state_updated_callback_func:
             await self._state_updated_callback_func(state)
-
-    async def _connection_broken_callback(self) -> None:
-        if self._connection_broken_callback_func:
-            await self._connection_broken_callback_func()

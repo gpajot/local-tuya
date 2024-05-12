@@ -5,11 +5,13 @@ import pytest
 
 from local_tuya.backoff import Backoff
 from local_tuya.protocol.events import (
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
     DataReceived,
     DataSent,
+    ResponseReceived,
 )
+from local_tuya.protocol.message.messages import EmptyResponse
 from local_tuya.protocol.transport import Transport, _get_host
 
 
@@ -20,7 +22,13 @@ class TestTransport:
 
     @pytest.fixture()
     def transport(self, backoff, notifier):
-        return Transport("address", 6666, backoff, notifier)
+        return Transport(
+            address="address",
+            port=6666,
+            backoff=backoff,
+            timeout=5,
+            event_notifier=notifier,
+        )
 
     @pytest.fixture()
     def transport_future(self):
@@ -71,16 +79,24 @@ class TestTransport:
         async with connected_transport:
             connected_transport.data_received(b"\x00")
             await asyncio.sleep(0)  # context switch.
+            await asyncio.sleep(0)  # context switch.
             assert_event_emitted(DataReceived(b"\x00"), 1)
 
-    async def test_reconnect(self, connected_transport, assert_event_emitted):
+    async def test_reconnect(
+        self, connected_transport, assert_event_emitted, backoff, notifier
+    ):
         async with connected_transport:
+            await asyncio.sleep(0)  # context switch.
             assert_event_emitted(ConnectionEstablished(), 1)
             error = ConnectionResetError()
             connected_transport.connection_lost(error)
             await asyncio.sleep(0)  # context switch.
-            assert_event_emitted(ConnectionLost(error), 1)
+            assert_event_emitted(ConnectionClosed(error), 1)
             assert_event_emitted(ConnectionEstablished(), 2)
+            assert backoff.wait.call_count == 2
+            backoff.reset.assert_not_called()
+            await notifier.emit(ResponseReceived(0, EmptyResponse(), None))
+            backoff.reset.assert_called_once()
 
 
 @pytest.mark.parametrize(

@@ -13,17 +13,17 @@ class TestSequenceBackoff:
     async def test_max_index(self, backoff):
         start = time.monotonic()
         with backoff:
-            await backoff()
-            await backoff()
-            await backoff()
+            await backoff.wait()
+            await backoff.wait()
+            await backoff.wait()
         end = time.monotonic()
         assert round(end - start, 2) == 0.05
 
     async def test_reset(self, backoff):
         start = time.monotonic()
         with backoff:
-            await backoff()
+            await backoff.wait()
         with backoff:
-            await backoff()
+            await backoff.wait()
         end = time.monotonic()
         assert round(end - start, 2) == 0.02

@@ -4,8 +4,8 @@ import pytest
 
 from local_tuya.protocol.events import (
     CommandSent,
+    ConnectionClosed,
     ConnectionEstablished,
-    ConnectionLost,
 )
 from local_tuya.protocol.heartbeat import Heartbeat
 from local_tuya.protocol.message import HeartbeatCommand
@@ -23,7 +23,7 @@ async def test_heartbeat(heartbeat, notifier, notifier_spy, assert_event_emitted
         await notifier.emit(ConnectionEstablished())
         await asyncio.sleep(0.015)
         assert_event_emitted(CommandSent(HeartbeatCommand()), 2)
-        await notifier.emit(ConnectionLost(None))
+        await notifier.emit(ConnectionClosed(None))
         notifier_spy.reset_mock()
         await asyncio.sleep(0.015)
         notifier_spy.assert_not_called()
