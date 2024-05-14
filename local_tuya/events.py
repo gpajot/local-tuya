@@ -1,12 +1,11 @@
 import inspect
-from abc import ABC
 from collections import defaultdict
 from typing import Any, Awaitable, Callable, DefaultDict, List, Type, TypeVar, cast
 
 from typing_extensions import ParamSpec
 
 
-class Event(ABC):  # noqa: B024
+class Event:
     """Base event class"""
 
 
@@ -23,7 +22,7 @@ class EventNotifier:
         self._listeners[event_class].append(
             cast(
                 Callable[[Event], Awaitable[None]],
-                maybe_async(listener),
+                _make_async(listener),
             )
         )
 
@@ -35,7 +34,7 @@ class EventNotifier:
 P = ParamSpec("P")
 
 
-def maybe_async(func: Callable[P, Any]) -> Callable[P, Awaitable[None]]:
+def _make_async(func: Callable[P, Any]) -> Callable[P, Awaitable[None]]:
     async def _wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
         res = func(*args, **kwargs)
         if inspect.iscoroutine(res):

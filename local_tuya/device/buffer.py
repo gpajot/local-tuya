@@ -92,7 +92,7 @@ class UpdateBuffer(BackgroundTask):
         )
 
     async def _filter(self, values: Values) -> Values:
-        state = await self._state_handler.state()
+        state = await self._state_handler.get()
         filtered = {k: v for k, v in values.items() if state[k] != v}
         if not self._constraints:
             return filtered
