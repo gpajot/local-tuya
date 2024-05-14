@@ -21,14 +21,14 @@ class TestUpdateBuffer:
         return UpdateBuffer(0.01, 0.01, protocol, state_handler, None)
 
     async def test__filter(self, buffer, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         filtered = await buffer._filter({"1": 2, "2": 2})
 
         assert filtered == {"1": 2}
 
     async def test_buffer_updates(self, buffer, protocol, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         with buffer:
             update1 = asyncio.create_task(buffer.update({"1": 2}))
@@ -40,7 +40,7 @@ class TestUpdateBuffer:
         protocol.update.assert_awaited_once_with({"1": 2, "2": 3})
 
     async def test_buffer_updates_rollback(self, buffer, protocol, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         with buffer:
             update1 = asyncio.create_task(buffer.update({"1": 2}))
@@ -52,7 +52,7 @@ class TestUpdateBuffer:
         protocol.update.assert_not_called()
 
     async def test_no_buffer_updates(self, buffer, protocol, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         with buffer:
             update1 = asyncio.create_task(buffer.update({"1": 2}))
@@ -70,7 +70,7 @@ class TestUpdateBuffer:
         )
 
     async def test_buffer_no_update(self, buffer, protocol, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         with buffer:
             await buffer.update({"1": 1})
@@ -78,7 +78,7 @@ class TestUpdateBuffer:
         protocol.update.assert_not_called()
 
     async def test_confirm_timeout(self, buffer, protocol, state_handler):
-        state_handler.state.return_value = {"1": 1, "2": 2}
+        state_handler.get.return_value = {"1": 1, "2": 2}
 
         async def _sleep(_):
             await asyncio.sleep(0.1)  # > timeout

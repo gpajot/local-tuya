@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import re
-from typing import Optional, cast
+from contextlib import AbstractAsyncContextManager
+from typing import Awaitable, Optional, cast
 
 from concurrent_tasks import BackgroundTask
 
@@ -18,7 +19,7 @@ from local_tuya.protocol.events import (
 logger = logging.getLogger(__name__)
 
 
-class Transport(asyncio.Protocol):
+class Transport(AbstractAsyncContextManager, asyncio.Protocol):
     def __init__(
         self,
         address: str,
@@ -46,18 +47,20 @@ class Transport(asyncio.Protocol):
         # We need a queue as `data_received` is not async.
         self._received_bytes: asyncio.Queue[bytes] = asyncio.Queue()
 
-    async def __aenter__(self):
+    def connect(self) -> Awaitable[None]:
         self._closed.clear()
-        self._connect_task.create()
-        return self
+        return self._connect_task.create()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         self._closing = True
         self._connect_task.cancel()
         self._receive_task.cancel()
+        self._received_bytes = asyncio.Queue()
         if self._transport:
             await self._notifier.emit(ConnectionClosed(None))
             self._transport.close()
+            self._transport = None
+            self._connected.clear()
             # Wait until `connection_lost` was called.
             try:
                 await asyncio.wait_for(self._closed.wait(), timeout=self._timeout)

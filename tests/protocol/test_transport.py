@@ -46,9 +46,17 @@ class TestTransport:
         return mock
 
     @pytest.fixture()
-    def connected_transport(self, transport, mock_transport, transport_future):
+    async def connected_transport(
+        self,
+        transport,
+        mock_transport,
+        transport_future,
+        notifier_spy,  # To spy the connection established event.
+    ):
         transport_future.set_result(mock_transport)
-        return transport
+        async with transport:
+            await transport.connect()
+            yield transport
 
     @pytest.mark.usefixtures("transport")
     async def test_write_disconnected(self, notifier):
@@ -56,14 +64,13 @@ class TestTransport:
             await notifier.emit(DataSent(b""))
 
     async def test_write_connected(self, connected_transport, notifier, mock_transport):
-        async with connected_transport:
-            await notifier.emit(DataSent(b"\x00"))
+        await notifier.emit(DataSent(b"\x00"))
         mock_transport.write.assert_called_once_with(b"\x00")
 
     async def test_write_connecting(
         self, notifier, transport, mock_transport, transport_future
     ):
-        connect_task = asyncio.create_task(transport.__aenter__())
+        transport.connect()
         send_task = asyncio.create_task(notifier.emit(DataSent(b"\x00")))
         await asyncio.sleep(0.001)  # context switch.
         mock_transport.write.assert_not_called()
@@ -71,32 +78,27 @@ class TestTransport:
         await asyncio.sleep(0.001)  # context switch.
         mock_transport.write.assert_called_once_with(b"\x00")
         # Cleanup.
-        await connect_task
         async with transport:
             await send_task
 
     async def test_receive(self, notifier, connected_transport, assert_event_emitted):
-        async with connected_transport:
-            connected_transport.data_received(b"\x00")
-            await asyncio.sleep(0)  # context switch.
-            await asyncio.sleep(0)  # context switch.
-            assert_event_emitted(DataReceived(b"\x00"), 1)
+        connected_transport.data_received(b"\x00")
+        await asyncio.sleep(0)  # context switch.
+        assert_event_emitted(DataReceived(b"\x00"), 1)
 
     async def test_reconnect(
         self, connected_transport, assert_event_emitted, backoff, notifier
     ):
-        async with connected_transport:
-            await asyncio.sleep(0)  # context switch.
-            assert_event_emitted(ConnectionEstablished(), 1)
-            error = ConnectionResetError()
-            connected_transport.connection_lost(error)
-            await asyncio.sleep(0)  # context switch.
-            assert_event_emitted(ConnectionClosed(error), 1)
-            assert_event_emitted(ConnectionEstablished(), 2)
-            assert backoff.wait.call_count == 2
-            backoff.reset.assert_not_called()
-            await notifier.emit(ResponseReceived(0, EmptyResponse(), None))
-            backoff.reset.assert_called_once()
+        assert_event_emitted(ConnectionEstablished(), 1)
+        error = ConnectionResetError()
+        connected_transport.connection_lost(error)
+        await asyncio.sleep(0)  # context switch.
+        assert_event_emitted(ConnectionClosed(error), 1)
+        assert_event_emitted(ConnectionEstablished(), 2)
+        assert backoff.wait.call_count == 2
+        backoff.reset.assert_not_called()
+        await notifier.emit(ResponseReceived(0, EmptyResponse(), None))
+        backoff.reset.assert_called_once()
 
 
 @pytest.mark.parametrize(

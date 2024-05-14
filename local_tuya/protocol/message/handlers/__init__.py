@@ -11,7 +11,6 @@ HANDLERS: List[Type[MessageHandler]] = [
 
 def get_handler(config: ProtocolConfig) -> MessageHandler:
     for handler_class in HANDLERS:
-        handler_ = handler_class.from_config(config)
-        if handler_:
+        if handler_ := handler_class.from_config(config):
             return handler_
     raise ValueError(f"unsupported device: {config!r}")

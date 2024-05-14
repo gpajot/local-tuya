@@ -54,7 +54,7 @@ class State(PeriodicTask):
             if self._state != new_state:
                 logger.debug("received new device state: %s", new_state)
                 self._state = new_state
-                await self._notifier.emit(StateUpdated(self._state))
+                await self._notifier.emit(StateUpdated(new_state.copy()))
         elif isinstance(event.response, StatusResponse):
             if self._state is None:
                 # We have not yet received the initial state.
@@ -64,4 +64,4 @@ class State(PeriodicTask):
             if self._state != new_state:
                 logger.debug("received device state update: %s", event.response.values)
                 self._state = new_state
-                await self._notifier.emit(StateUpdated(self._state))
+                await self._notifier.emit(StateUpdated(new_state.copy()))
