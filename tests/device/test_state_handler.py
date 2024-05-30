@@ -7,7 +7,7 @@ from local_tuya.protocol import StateUpdated
 
 
 @pytest.fixture()
-def handler(notifier):
+async def handler(notifier):
     return StateHandler(notifier)
 
 
