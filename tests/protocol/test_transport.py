@@ -21,7 +21,7 @@ class TestTransport:
         return mocker.MagicMock(spec=Backoff)
 
     @pytest.fixture()
-    def transport(self, backoff, notifier):
+    async def transport(self, backoff, notifier):
         return Transport(
             address="address",
             port=6666,
@@ -31,7 +31,7 @@ class TestTransport:
         )
 
     @pytest.fixture()
-    def transport_future(self):
+    async def transport_future(self):
         return asyncio.Future()
 
     @pytest.fixture()
