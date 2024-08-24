@@ -8,15 +8,15 @@ from local_tuya.protocol import Protocol
 
 
 class TestUpdateBuffer:
-    @pytest.fixture()
+    @pytest.fixture
     def protocol(self, mocker):
         return mocker.MagicMock(spec=Protocol)
 
-    @pytest.fixture()
+    @pytest.fixture
     def state_handler(self, mocker):
         return mocker.MagicMock(spec=StateHandler)
 
-    @pytest.fixture()
+    @pytest.fixture
     def buffer(self, protocol, state_handler):
         return UpdateBuffer(0.01, 0.01, protocol, state_handler, None)
 

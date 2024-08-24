@@ -14,14 +14,14 @@ from local_tuya.protocol.message.messages import (
 
 
 class TestV33MessageHandler:
-    @pytest.fixture()
+    @pytest.fixture
     def config(self, mocker, key) -> ProtocolConfig:
         cfg = mocker.Mock(spec=ProtocolConfig)
         cfg.key = key
         cfg.version = Version.v33
         return cfg
 
-    @pytest.fixture()
+    @pytest.fixture
     def handler(self, config) -> V33MessageHandler:
         return V33MessageHandler(config)
 

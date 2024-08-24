@@ -22,7 +22,7 @@ from local_tuya.protocol.sender import Sender
 
 
 class TestSender:
-    @pytest.fixture()
+    @pytest.fixture
     def msg_handler(self, mocker):
         handler = mocker.Mock(spec=MessageHandler)
         handler.pack.return_value = b"\x00"
@@ -33,7 +33,7 @@ class TestSender:
         async with Sender(msg_handler, notifier, 0.01) as sender:
             yield sender
 
-    @pytest.fixture()
+    @pytest.fixture
     def command_sent(self):
         return CommandSent(HeartbeatCommand())
 

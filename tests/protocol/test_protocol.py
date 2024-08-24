@@ -6,11 +6,11 @@ from local_tuya.protocol.protocol import Protocol
 
 
 class TestProtocol:
-    @pytest.fixture()
+    @pytest.fixture
     def transport(self, mocker):
         return mocker.Mock()
 
-    @pytest.fixture()
+    @pytest.fixture
     def protocol(self, transport, notifier):
         return Protocol(notifier, transport)
 
