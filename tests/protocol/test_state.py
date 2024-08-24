@@ -14,7 +14,7 @@ from local_tuya.protocol.state import State
 
 
 class TestState:
-    @pytest.fixture()
+    @pytest.fixture
     def state(self, notifier):
         return State(0.01, notifier)
 

@@ -11,7 +11,7 @@ from local_tuya.protocol.heartbeat import Heartbeat
 from local_tuya.protocol.message import HeartbeatCommand
 
 
-@pytest.fixture()
+@pytest.fixture
 def heartbeat(notifier):
     return Heartbeat(0.01, notifier)
 

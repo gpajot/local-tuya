@@ -6,11 +6,11 @@ from local_tuya.protocol.receiver import Receiver
 
 
 class TestReceiver:
-    @pytest.fixture()
+    @pytest.fixture
     def msg_handler(self, mocker):
         return mocker.Mock(spec=MessageHandler)
 
-    @pytest.fixture()
+    @pytest.fixture
     def receiver(self, msg_handler, notifier):
         return Receiver(msg_handler, notifier)
 

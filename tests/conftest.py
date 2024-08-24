@@ -8,17 +8,17 @@ from local_tuya.protocol.events import ConnectionEstablished
 from local_tuya.protocol.message import HeartbeatCommand, StateCommand, StatusResponse
 
 
-@pytest.fixture()
+@pytest.fixture
 def notifier():
     return EventNotifier()
 
 
-@pytest.fixture()
+@pytest.fixture
 def notifier_spy(mocker, notifier):
     return mocker.spy(notifier, "emit")
 
 
-@pytest.fixture()
+@pytest.fixture
 def assert_event_emitted(notifier_spy):
     def _assert_equal(a, b):
         assert type(a) is type(b)

@@ -16,11 +16,11 @@ from local_tuya.protocol.transport import Transport, _get_host
 
 
 class TestTransport:
-    @pytest.fixture()
+    @pytest.fixture
     def backoff(self, mocker):
         return mocker.MagicMock(spec=Backoff)
 
-    @pytest.fixture()
+    @pytest.fixture
     async def transport(self, backoff, notifier):
         return Transport(
             address="address",
@@ -30,11 +30,11 @@ class TestTransport:
             event_notifier=notifier,
         )
 
-    @pytest.fixture()
+    @pytest.fixture
     async def transport_future(self):
         return asyncio.Future()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_transport(self, mocker, transport, transport_future):
         mock = mocker.Mock(spec=asyncio.transports.WriteTransport)
 
@@ -45,7 +45,7 @@ class TestTransport:
         mock.close.side_effect = lambda: transport._closed.set()
         return mock
 
-    @pytest.fixture()
+    @pytest.fixture
     async def connected_transport(
         self,
         transport,
