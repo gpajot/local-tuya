@@ -9,7 +9,7 @@ repository = "https://github.com/gpajot/local-tuya"
 include = ["local_tuya/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 
 concurrent-tasks = ">=1.6,<2"
 imbue = ">=2.1.1,<3"
