@@ -4,8 +4,8 @@ from dataclasses import fields, is_dataclass
 import pytest
 
 from local_tuya.events import EventNotifier
-from local_tuya.protocol.events import ConnectionEstablished
-from local_tuya.protocol.message import HeartbeatCommand, StateCommand, StatusResponse
+from local_tuya.tuya.events import TuyaConnectionEstablished
+from local_tuya.tuya.message import HeartbeatCommand, StateCommand, StatusResponse
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def notifier_spy(mocker, notifier):
 def assert_event_emitted(notifier_spy):
     def _assert_equal(a, b):
         assert type(a) is type(b)
-        if isinstance(a, (ConnectionEstablished, HeartbeatCommand, StateCommand)):
+        if isinstance(a, (TuyaConnectionEstablished, HeartbeatCommand, StateCommand)):
             return
         if isinstance(a, StatusResponse):
             assert a.error == b.error

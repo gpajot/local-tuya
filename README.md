@@ -1,26 +1,52 @@
 # local-tuya
 
 [![tests](https://github.com/gpajot/local-tuya/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![version](https://img.shields.io/pypi/v/local_tuya?label=stable)](https://pypi.org/project/local_tuya/)
-[![python](https://img.shields.io/pypi/pyversions/local_tuya)](https://pypi.org/project/local_tuya/)
+[![version](https://img.shields.io/docker/v/gpajot/local-tuya/latest)](https://hub.docker.com/r/gpajot/local-tuya)
 
-Interface to Tuya devices over LAN.
+Control Tuya devices with MQTT over LAN.
+
+- [Features](#features)
+- [Supported devices](#supported-devices)
+- [Installation](#installation)
+- [Architecture](#architecture)
 
 ## Features
-- asynchronous methods and transport
-- persistent and robust communication to the device
+- fully asynchronous
+- persistent and robust communication to the device and to MQTT
+- [MQTT discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery)
 - automatic remote device state updates (remotes can still be used)
 - configurable buffering for subsequent updates
 - constraints between device commands
-- Domoticz plugin using a dedicated thread
 
 > 💡 For now, only v3.3 is supported as I only own devices using this version.
 
-## Examples
-- [local-tuya-ceiling-fan](https://github.com/gpajot/local-tuya-ceiling-fan)
-- [airton-ac](https://github.com/gpajot/airton-ac)
+## Supported devices
+- [Airton AC](./local_tuya/contrib/airton_ac.py)
+- [Ceiling Fan](./local_tuya/contrib/ceiling_fan.py)
 
-## Requirements
+## Installation
+
+The easiest way is to use the Docker image.
+
+Alternatively, you can use the python package and run directly: `CONFIG=path/to/config python -m local-tuya.manager`
+
+### Configuration
+
+The minimal config is:
+```yaml
+mqtt:
+  discovery_prefix: {YOUR_PREFIX_HERE}
+  hostname: 127.0.0.1
+devices:
+  - name: My AC
+    model: Airton AC
+    config:
+      tuya:
+        id_: {DEVICE_ID_HERE}
+        address: {DEVICE_IP_HERE}
+        key: {DEVICE_KEY_HERE}
+```
+
 To control a device you will need these 3 things:
 - the device ID
 - the device local IP address
@@ -37,23 +63,27 @@ To control a device you will need these 3 things:
 > - After pairing the devices, it's recommended to assign static IPs in your router.
 > - If you reset or re-pair devices the local key will change.
 > - You can delete your tuya IOT account but not the SmartLife one and devices should be kept there.
-> - For state updates to be received properly, the device needs to be able to access the Tuya backend.
+> - It looks like you can block the device access to internet from your router and still have it working.
 
 ## Architecture
-This library is composed of two main components:
+This library is composed of three main components:
 - the Tuya protocol
 - the device
+- the MQTT client
 
-### Protocol
-The protocol is responsible for handling communication details with the Tuya device.
-Its interface consists of an asynchronous method to update the device and accepts a callback to subscribe to state changes.
+### Tuya protocol
+The Tuya protocol is responsible for handling communication details with the Tuya device.
+Its interface consists of an asynchronous method to update the device and exposes state changes via events.
 
-See [protocol module](./local_tuya/protocol).
+See [protocol module](./local_tuya/tuya).
 
 ### Device
 The device handles higher level functional logic such as buffering, constraints and specific device commands.
 
 See [device module](./local_tuya/device).
 
-## Domoticz plugin tools
-See [Domoticz tools package](https://github.com/gpajot/local-tuya-domoticz-tools).
+### MQTT client
+Communication with home hubs through MQTT, supporting auto discovery.
+
+See [mqtt module](./local_tuya/mqtt).
+
