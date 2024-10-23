@@ -1,10 +1,9 @@
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional
 
-from local_tuya.device.enums import DataPoint
 from local_tuya.protocol import Value, Values
 
-Blacklist = Dict[str, Optional[Set[Value]]]
-_Blacklist = Dict[str, Set[Value]]
+Blacklist = dict[str, Optional[set[Value]]]
+_Blacklist = dict[str, set[Value]]
 
 
 class Constraint:
@@ -12,9 +11,9 @@ class Constraint:
 
     def __init__(
         self,
-        data_point: DataPoint,
+        data_point: str,
         value: Value,
-        *blacklist: Tuple[DataPoint, Optional[Set[Value]]],
+        *blacklist: tuple[str, Optional[set[Value]]],
     ):
         self._data_point = data_point
         self._value = value
