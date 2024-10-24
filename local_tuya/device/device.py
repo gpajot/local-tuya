@@ -1,69 +1,150 @@
-import asyncio
 import logging
+from abc import ABC, abstractmethod
+from concurrent import futures
 from contextlib import AsyncExitStack
-from typing import AsyncIterator, Callable, Generic, Optional, TypeVar, cast
+from functools import partial
+from typing import ClassVar, Collection, Optional, Union
 
-from imbue import Container
+from concurrent_tasks import ThreadSafeTaskPool
 
 from local_tuya.device.buffer import UpdateBuffer
 from local_tuya.device.config import DeviceConfig
 from local_tuya.device.constraints import Constraints
-from local_tuya.device.dependencies import DevicePackage
-from local_tuya.device.enums import State
 from local_tuya.device.state import StateHandler
 from local_tuya.events import EventNotifier
-from local_tuya.protocol import Protocol, ProtocolPackage, StateUpdated, Values
+from local_tuya.protocol import DeviceDiscovery, Protocol, Values
+from local_tuya.tuya import (
+    TuyaConnectionClosed,
+    TuyaConnectionEstablished,
+    TuyaProtocol,
+    TuyaStateUpdated,
+)
 
 logger = logging.getLogger(__name__)
-T = TypeVar("T", bound=State)
 
 
-class Device(AsyncExitStack, Generic[T]):
+class Device(AsyncExitStack, ABC):
+    DISCOVERY: ClassVar[DeviceDiscovery]
+    CONSTRAINTS: ClassVar[Optional[Constraints]] = None
+
     def __init__(
         self,
+        name: str,
         config: DeviceConfig,
-        load_state: Callable[[Values], T],
-        constraints: Optional[Constraints] = None,
+        protocol: Protocol,
+        event_notifier: EventNotifier,
+        tuya_protocol: TuyaProtocol,
     ):
         super().__init__()
-        self._load_state = load_state
-        self._container = Container(
-            DevicePackage(config, constraints),
-            ProtocolPackage(config.protocol),
-        ).application_context()
-        self._state_handler: Optional[StateHandler] = None
-        self._buffer: Optional[UpdateBuffer] = None
-        self._last_state: Optional[T] = None
-        self._state_updated = asyncio.Event()
+        self._name = name
+        self._cfg = config
+
+        self._protocol = protocol
+        self._tuya_protocol = tuya_protocol
+        self._buffer = UpdateBuffer(
+            device_name=self._name,
+            delay=config.debounce_updates,
+            confirm_timeout=config.confirm_timeout,
+            protocol=tuya_protocol,
+            state_handler=StateHandler(self._name, event_notifier),
+            constraints=self.CONSTRAINTS,
+        )
+        event_notifier.register(TuyaStateUpdated, self._update_state)
+        event_notifier.register(TuyaConnectionEstablished, self._set_availability)
+        event_notifier.register(TuyaConnectionClosed, self._set_availability)
+
+        # Run in task pools to buffer traffic and avoid blocking the device.
+        self._send_task_pool = ThreadSafeTaskPool(
+            size=1,
+            timeout=self._protocol.timeout,
+        )
+        self._receive_task_pool = ThreadSafeTaskPool(
+            size=1,
+            timeout=config.tuya.timeout + config.confirm_timeout,
+        )
+
+    @classmethod
+    @abstractmethod
+    def filter_data_points(
+        cls, included_components: Optional[Collection[str]]
+    ) -> set[str]: ...
+
+    @abstractmethod
+    def _from_tuya_payload(self, tuya_payload: Values) -> Values: ...
+
+    @abstractmethod
+    def _to_tuya_payload(self, payload: Values) -> Values: ...
 
     async def __aenter__(self):
-        await self.enter_async_context(self._container)
-        self._state_handler = await self._container.get(StateHandler)
-        self._buffer = await self._container.get(UpdateBuffer)
-        event_notifier = await self._container.get(EventNotifier)
-        event_notifier.register(StateUpdated, self._update_last_state)
-        (await self._container.get(Protocol)).connect()
+        logger.debug("%s: initializing...", self._name)
+        await self.enter_async_context(self._send_task_pool)
+        await self.enter_async_context(self._receive_task_pool)
+        if self._cfg.enable_discovery:
+            self._check_future(
+                self._send_task_pool.create_task(
+                    self._protocol.send_discovery(
+                        self.DISCOVERY.filter_components(self._cfg.included_components),
+                        self._cfg.tuya.id_,
+                        self._name,
+                    ),
+                ),
+                task="sending discovery",
+            )
+        self.callback(self._buffer.cancel)
+        await self.enter_async_context(self._tuya_protocol.initialize())
         return self
 
-    async def state(self) -> AsyncIterator[T]:
-        if self._last_state:
-            yield self._last_state
-        while True:
-            await self._state_updated.wait()
-            self._state_updated.clear()
-            yield cast(T, self._last_state)
+    def _update_state(self, event: TuyaStateUpdated) -> None:
+        state = self._from_tuya_payload(event.values)
+        logger.debug("%s: received new device state: %s", self._name, state)
+        self._check_future(
+            self._send_task_pool.create_task(
+                self._protocol.send_state(self._cfg.tuya.id_, state),
+            ),
+            task="sending state update",
+        )
 
-    def _update_last_state(self, event: StateUpdated) -> None:
-        self._last_state = self._load_state(event.values)
-        logger.debug("received new device state: %s", self._last_state)
-        self._state_updated.set()
+    def _set_availability(
+        self, event: Union[TuyaConnectionEstablished, TuyaConnectionClosed]
+    ) -> None:
+        self._check_future(
+            self._send_task_pool.create_task(
+                self._protocol.set_availability(
+                    self._cfg.tuya.id_,
+                    isinstance(event, TuyaConnectionEstablished),
+                )
+            ),
+            task="setting availability",
+        )
 
-    async def _state(self) -> T:
-        if not self._state_handler:
-            raise RuntimeError(f"{self:r} context has not been entered")
-        return self._load_state(await self._state_handler.get())
+    def update(self, payload: Values) -> None:
+        try:
+            tuya_payload = self._to_tuya_payload(payload)
+        except Exception:
+            logger.warning(
+                "%s: could no load tuya payload from %s",
+                self._name,
+                payload,
+                exc_info=True,
+            )
+            return
+        logger.debug("%s: received command: %s", self._name, tuya_payload)
+        self._check_future(
+            self._receive_task_pool.create_task(self._buffer.update(tuya_payload)),
+            task="sending command to device",
+        )
 
-    async def _update(self, values: Values) -> None:
-        if not self._buffer:
-            raise RuntimeError(f"{self:r} context has not been entered")
-        await self._buffer.update(values)
+    def _check_future(self, future: futures.Future, *, task: str) -> None:
+        """Add a callback to warn if errors are raised in background tasks
+        otherwise they would be silenced."""
+        future.add_done_callback(partial(self._log_task_exceptions, task))
+
+    def _log_task_exceptions(self, task: str, future: futures.Future) -> None:
+        if future.cancelled():
+            return
+        try:
+            future.result(0)
+        except TimeoutError:
+            logger.error("%s: timeout %s", self._name, task)
+        except Exception:
+            logger.error("%s: exception caught", self._name, exc_info=True)

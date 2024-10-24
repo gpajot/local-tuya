@@ -4,13 +4,13 @@ import pytest
 
 from local_tuya.device.buffer import UpdateBuffer
 from local_tuya.device.state import StateHandler
-from local_tuya.protocol import Protocol
+from local_tuya.tuya import TuyaProtocol
 
 
 class TestUpdateBuffer:
     @pytest.fixture
     def protocol(self, mocker):
-        return mocker.MagicMock(spec=Protocol)
+        return mocker.MagicMock(spec=TuyaProtocol)
 
     @pytest.fixture
     def state_handler(self, mocker):
@@ -18,7 +18,7 @@ class TestUpdateBuffer:
 
     @pytest.fixture
     def buffer(self, protocol, state_handler):
-        return UpdateBuffer(0.01, 0.01, protocol, state_handler, None)
+        return UpdateBuffer("test", 0.01, 0.01, protocol, state_handler, None)
 
     async def test__filter(self, buffer, state_handler):
         state_handler.get.return_value = {"1": 1, "2": 2}
