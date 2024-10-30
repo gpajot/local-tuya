@@ -93,17 +93,17 @@ license = ["ukkonen"]
 
 [[package]]
 name = "imbue"
-version = "2.1.1"
+version = "2.1.2"
 description = "Type based python dependency injection framework."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "imbue-2.1.1-py3-none-any.whl", hash = "sha256:8434460764849ef5a27d04c8722f4f48100221b61e5dbb626370a9e2a7b1545f"},
-    {file = "imbue-2.1.1.tar.gz", hash = "sha256:49d6302376e3ac5aa69c769a583fb1b1a21512421899cf40938b4e9d3697d202"},
+    {file = "imbue-2.1.2-py3-none-any.whl", hash = "sha256:e784b98a05c41c5a1f9aca15897d315437a56face93accf5003a90fe63d32421"},
+    {file = "imbue-2.1.2.tar.gz", hash = "sha256:3cca3cf1136400d7ef1cae7e42fad27b1b0cb6820a2f637f16f54c09bafaf1a1"},
 ]
 
 [package.extras]
-fastapi = ["fastapi (>=0.111,<2)"]
+fastapi = ["fastapi[standard] (>=0.112.1,<2)"]
 
 [[package]]
 name = "iniconfig"
