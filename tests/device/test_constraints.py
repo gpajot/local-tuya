@@ -1,10 +1,11 @@
+from enum import Enum
+
 import pytest
 
 from local_tuya.device.constraints import Constraint, Constraints
-from local_tuya.device.enums import DataPoint
 
 
-class DPS(DataPoint):
+class DPS(str, Enum):
     A = "1"
     B = "2"
     C = "3"
