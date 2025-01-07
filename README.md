@@ -1,9 +1,9 @@
 # local-tuya
 
 [![tests](https://github.com/gpajot/local-tuya/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![version](https://img.shields.io/pypi/v/local_tuya?label=stable)](https://pypi.org/project/local_tuya/)
+[![PyPi](https://img.shields.io/pypi/v/local_tuya?label=stable)](https://pypi.org/project/local_tuya/)
 [![python](https://img.shields.io/pypi/pyversions/local_tuya)](https://pypi.org/project/local_tuya/)
-[![version](https://img.shields.io/docker/v/gpajot/local-tuya/latest)](https://hub.docker.com/r/gpajot/local-tuya)
+[![DockerHub](https://img.shields.io/docker/v/gpajot/local-tuya/latest)](https://hub.docker.com/r/gpajot/local-tuya)
 
 Control Tuya devices with MQTT over LAN.
 
@@ -20,7 +20,8 @@ Control Tuya devices with MQTT over LAN.
 - configurable buffering for subsequent updates
 - constraints between device commands
 
-> 💡 For now, only v3.3 is supported as I only own devices using this version.
+> [!IMPORTANT]
+> For now, only v3.3 is supported as I only own devices using this version.
 
 ## Supported devices
 - [Airton AC](./local_tuya/contrib/airton_ac.py)
@@ -58,14 +59,16 @@ To control a device you will need these 3 things:
 - the device local IP address
 - the device local key (encryption key generated upon pairing)
 
-> ⚠️ This library does not provide support for getting these.
+> [!IMPORTANT]
+> This library does not provide support for getting these.
 > See how to do that using any of those projects:
 > - [tuyapi](https://github.com/codetheweb/tuyapi)
 > - [tinytuya](https://github.com/jasonacox/tinytuya)
 > 
 > Generous thanks to the maintainers of those tools for details on interfacing with Tuya devices.
 
-> ⚠️ Keep in mind that:
+> [!WARNING]
+> Keep in mind that:
 > - After pairing the devices, it's recommended to assign static IPs in your router.
 > - If you reset or re-pair devices the local key will change.
 > - You can delete your tuya IOT account but not the SmartLife one and devices should be kept there.
