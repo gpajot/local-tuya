@@ -21,4 +21,5 @@ For more details, see [constraints](./constraints.py).
 ## Buffering
 Can be activated to group multiple commands into a single one.
 
-> 💡 If 2 commands cancel each other nothing will be sent to the device.
+> [!NOTE]
+> If 2 commands cancel each other nothing will be sent to the device.
