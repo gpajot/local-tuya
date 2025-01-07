@@ -26,7 +26,11 @@ Control Tuya devices with MQTT over LAN.
 
 ## Installation
 
-The easiest way is to use the Docker image.
+The easiest way is to use the Docker image:
+
+```commandline
+docker run -v {PATH_TO_CONFIG}:/app/conf.yaml:ro gpajot/local-tuya
+```
 
 Alternatively, you can use the python package and run directly: `CONFIG=path/to/config python -m local-tuya.manager`
 
