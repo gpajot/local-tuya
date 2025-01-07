@@ -16,13 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Generate image metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -33,6 +27,12 @@ jobs:
             type=pep440,pattern={{major}}
             type=raw,value=latest
             type=sha
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -62,3 +62,4 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.repository }}
+          short-description: ${{ github.event.repository.description }}
