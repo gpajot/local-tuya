@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "local_tuya"
-version = "4.0.1"
+version = "4.0.2"
 description = "Control Tuya devices with MQTT over LAN."
 authors = ["Gabriel Pajot <gab@lescactus.eu>"]
 license = "MIT"
