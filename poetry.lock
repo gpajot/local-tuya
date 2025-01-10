@@ -50,13 +50,13 @@ files = [
 
 [[package]]
 name = "concurrent-tasks"
-version = "1.8.1"
+version = "1.9.0"
 description = "Tools to run asyncio tasks concurrently."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "concurrent_tasks-1.8.1-py3-none-any.whl", hash = "sha256:a33031e0e72353a64f1178f5306f551a1a0f2205c22a0cd5f392416628725579"},
-    {file = "concurrent_tasks-1.8.1.tar.gz", hash = "sha256:c0ddaacba2ca90eec25b43f50ebfdda5dad8ef87013d3ee3a493a70c320704a5"},
+    {file = "concurrent_tasks-1.9.0-py3-none-any.whl", hash = "sha256:6fa487a2557d92194ca585c73ddf8321222e8c5627bc49a028e39f7c581727f4"},
+    {file = "concurrent_tasks-1.9.0.tar.gz", hash = "sha256:792b7081de4b5200e7b617ea16e1d69f72f6a2eb7e5bc095bcb60ff54e2b05a6"},
 ]
 
 [package.dependencies]
