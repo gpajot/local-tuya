@@ -1,11 +1,11 @@
+import asyncio
 import logging
 from abc import ABC, abstractmethod
-from concurrent import futures
 from contextlib import AsyncExitStack
 from functools import partial
 from typing import ClassVar, Collection, Optional, Union
 
-from concurrent_tasks import ThreadSafeTaskPool
+from concurrent_tasks import TaskPool
 
 from local_tuya.device.buffer import UpdateBuffer
 from local_tuya.device.config import DeviceConfig
@@ -54,11 +54,11 @@ class Device(AsyncExitStack, ABC):
         event_notifier.register(TuyaConnectionClosed, self._set_availability)
 
         # Run in task pools to buffer traffic and avoid blocking the device.
-        self._send_task_pool = ThreadSafeTaskPool(
+        self._send_task_pool = TaskPool(
             size=1,
             timeout=self._protocol.timeout,
         )
-        self._receive_task_pool = ThreadSafeTaskPool(
+        self._receive_task_pool = TaskPool(
             size=1,
             timeout=config.tuya.timeout + config.confirm_timeout,
         )
@@ -134,16 +134,16 @@ class Device(AsyncExitStack, ABC):
             task="sending command to device",
         )
 
-    def _check_future(self, future: futures.Future, *, task: str) -> None:
+    def _check_future(self, future: asyncio.Future, *, task: str) -> None:
         """Add a callback to warn if errors are raised in background tasks
         otherwise they would be silenced."""
         future.add_done_callback(partial(self._log_task_exceptions, task))
 
-    def _log_task_exceptions(self, task: str, future: futures.Future) -> None:
+    def _log_task_exceptions(self, task: str, future: asyncio.Future) -> None:
         if future.cancelled():
             return
         try:
-            future.result(0)
+            future.result()
         except TimeoutError:
             logger.error("%s: timeout %s", self._name, task)
         except Exception:
