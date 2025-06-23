@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS builder-base
+FROM python:3.13-slim AS python-builder-base
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
@@ -14,18 +14,17 @@ ENV POETRY_VERSION=1.8.4 \
 
 RUN curl -sSL https://install.python-poetry.org | python -
 
-WORKDIR /tmp
+WORKDIR /app
 COPY ./pyproject.toml ./poetry.lock ./
 RUN $POETRY_HOME/venv/bin/poetry install --only main --no-root && rm -rf $POETRY_CACHE_DIR
-
 
 FROM python:3.13-slim
 
 WORKDIR /app
-COPY --from=builder-base /tmp/.venv /app/.venv
+COPY --from=python-builder-base /app/.venv ./.venv
 COPY ./local_tuya ./local_tuya
 
 ENV PATH="/app/.venv/bin:$PATH"
-ENV CONFIG="/app/conf.yaml"
+ENV CONFIG="/app/config/conf.yaml"
 
 ENTRYPOINT ["python", "-m", "local_tuya"]
