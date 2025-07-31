@@ -32,11 +32,14 @@ class TuyaPackage(Package):
         return get_handler(self._cfg)
 
     @auto_context(eager=True)
-    async def transport(self, notifier: EventNotifier) -> AsyncIterator[Transport]:
+    async def transport(
+        self, notifier: EventNotifier, message_handler: MessageHandler
+    ) -> AsyncIterator[Transport]:
         async with Transport(
             name=self._name,
             address=self._cfg.address,
             port=self._cfg.port,
+            separator=message_handler.SUFFIX.to_bytes(length=4, byteorder="big"),
             backoff=self._cfg.connection_backoff,
             timeout=self._cfg.timeout,
             event_notifier=notifier,
