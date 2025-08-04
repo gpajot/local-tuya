@@ -17,8 +17,8 @@ repos:
           - python
       - id: mypy
         name: mypy
-        entry: poetry run mypy
+        entry: poetry run mypy .
         language: system
-        pass_filenames: true
+        pass_filenames: false
         types:
           - python

@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import ClassVar, Optional
 
 from local_tuya.tuya.config import TuyaConfig
 from local_tuya.tuya.message.messages import Command, Response
 
 
 class MessageHandler(ABC):
+    SUFFIX: ClassVar[int]
+
     @staticmethod
     @abstractmethod
     def from_config(config: TuyaConfig) -> Optional["MessageHandler"]:
