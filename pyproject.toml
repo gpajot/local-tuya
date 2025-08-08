@@ -22,7 +22,7 @@ zenconfig = { version = ">=2.1.1,<3", extras = ["pydantic", "yaml"] }
 pytest = "==8.4.1"
 pytest-asyncio = "==1.1.0"
 pytest-mock = "==3.14.1"
-ruff = "==0.12.7"
+ruff = "==0.12.8"
 mypy = "==1.17.1"
 pre-commit = "==4.2.0"
 
