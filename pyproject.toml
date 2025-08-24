@@ -11,7 +11,7 @@ authors = [
 urls = { repository = "https://github.com/gpajot/local-tuya" }
 dependencies = [
     "aiomqtt >=2.3.0,<3 ; python_version < '4'",
-    "concurrent-tasks >=1.13,<2",
+    "concurrent-tasks >=1.14,<2",
     "imbue >=2.1.1,<3",
     "pycryptodomex >=3,<4",
     "typing-extensions >=4.10",
