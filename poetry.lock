@@ -69,14 +69,14 @@ files = [
 
 [[package]]
 name = "concurrent-tasks"
-version = "1.13.0"
+version = "1.14.0"
 description = "Tools to run asyncio tasks concurrently."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "concurrent_tasks-1.13.0-py3-none-any.whl", hash = "sha256:ef0b450c7858f45546b23764761aa9d3a475ea6f7895b1c1b955283d13547841"},
-    {file = "concurrent_tasks-1.13.0.tar.gz", hash = "sha256:2a52a4f4b0d6c6dea57e641a88d37673f101157a559e6bf576635f0d7239c777"},
+    {file = "concurrent_tasks-1.14.0-py3-none-any.whl", hash = "sha256:0d147f0f930ec80791565f69eb763d970c16bec28930ebeafd31f969931dfba3"},
+    {file = "concurrent_tasks-1.14.0.tar.gz", hash = "sha256:5b2cb5711121e0d0f4c608502bdbabbaa9c4bbc6ad28573eaf8807ccd22e55b6"},
 ]
 
 [package.dependencies]
@@ -817,4 +817,4 @@ yaml = ["PyYAML (>=6,<7)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9"
-content-hash = "ff7b86c6eece24c72eca202c4b94540d8cc767b2641c517daeb13c3fcc2efc41"
+content-hash = "86708b8d417d2cd3f267f0f39ce607aaf218aae69da4af364d996a65c278ea04"

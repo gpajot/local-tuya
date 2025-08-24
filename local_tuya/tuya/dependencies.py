@@ -1,4 +1,4 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterator
 
 from imbue import Package, auto_context
 
@@ -59,12 +59,12 @@ class TuyaPackage(Package):
         )
 
     @auto_context(eager=True)
-    async def sender(
+    def sender(
         self,
         notifier: EventNotifier,
         msg_handler: MessageHandler,
-    ) -> AsyncIterator[Sender]:
-        async with Sender(
+    ) -> Iterator[Sender]:
+        with Sender(
             name=self._name,
             message_handler=msg_handler,
             event_notifier=notifier,

@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-import pytest_asyncio
 
 from local_tuya.errors import CommandTimeoutError, ResponseError
 from local_tuya.tuya.events import (
@@ -28,10 +27,10 @@ class TestSender:
         handler.pack.return_value = b"\x00"
         return handler
 
-    @pytest_asyncio.fixture()
-    async def sender(self, msg_handler, notifier):
-        async with Sender("test", msg_handler, notifier, 0.01) as sender:
-            yield sender
+    @pytest.fixture
+    def sender(self, msg_handler, notifier):
+        with Sender("test", msg_handler, notifier, 0.01) as s:
+            yield s
 
     @pytest.fixture
     def command_sent(self):

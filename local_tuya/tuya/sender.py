@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from contextlib import AbstractAsyncContextManager
+from contextlib import AbstractContextManager
 from functools import partial
 from typing import Optional
 
@@ -20,7 +20,7 @@ from local_tuya.tuya.message import Command, HeartbeatCommand, MessageHandler
 logger = logging.getLogger(__name__)
 
 
-class Sender(AbstractAsyncContextManager):
+class Sender(AbstractContextManager):
     def __init__(
         self,
         name: str,
@@ -39,21 +39,23 @@ class Sender(AbstractAsyncContextManager):
         self._pending_tasks: dict[
             tuple[int, Optional[type[Command]]], RestartableTask[None]
         ] = {}
-        self._can_send = False
+        self._can_send = asyncio.Event()
         self._sequence_number = 0
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        # This has to be async to let task cancellation be effective.
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         for task in self._pending_tasks.values():
             task.cancel()
+        self._pending_tasks = {}
+        self._can_send.clear()
+        self._sequence_number = 0
 
     def _connection_established(self, _: TuyaConnectionEstablished) -> None:
-        self._can_send = True
         for task in self._pending_tasks.values():
             task.start()
+        self._can_send.set()
 
     def _connection_lost(self, _: TuyaConnectionClosed) -> None:
-        self._can_send = False
+        self._can_send.clear()
         for task in self._pending_tasks.values():
             task.cancel()
 
@@ -69,7 +71,8 @@ class Sender(AbstractAsyncContextManager):
 
     async def _send(self, event: TuyaCommandSent) -> None:
         """Send a message, waiting for the response.
-        Timeout is for waiting the response, it will wait until a connection can be acquired.
+        Timeout is for waiting for the response, only.
+        Waiting for the connection to be available is excluded.
         """
         sequence_number = self._get_sequence_number(event.command)
         logger.debug(
@@ -79,12 +82,12 @@ class Sender(AbstractAsyncContextManager):
             event.command.__class__.__name__,
         )
         data = self._handler.pack(sequence_number, event.command)
+        await self._can_send.wait()
         task = RestartableTask[None](
             partial(self._notifier.emit, TuyaDataSent(data)),
             timeout=self._timeout,
         )
-        if self._can_send:
-            task.start()
+        task.start()
         self._pending_tasks[(sequence_number, type(event.command))] = task
         try:
             await task
