@@ -26,7 +26,7 @@ requires-poetry = ">=2"
 pytest = "==8.4.1"
 pytest-asyncio = "==1.1.0"
 pytest-mock = "==3.14.1"
-ruff = "==0.12.10"
+ruff = "==0.12.11"
 mypy = "==1.17.1"
 pre-commit = "==4.3.0"
 
