@@ -32,7 +32,7 @@ class TuyaStream(RobustStream):
         super().__init__(
             connector=partial(
                 asyncio.get_running_loop().create_connection,
-                address=address,
+                host=address,
                 port=port,
             ),
             name=name,
