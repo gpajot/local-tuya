@@ -1,25 +1,26 @@
-FROM python:3.13 AS python-builder-base
+FROM python:3.13-slim AS python-builder-base
 
-ENV POETRY_VERSION=2.1.3 \
-    POETRY_HOME=/etc/poetry \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+COPY --from=ghcr.io/astral-sh/uv:0.8 /uv /uvx /bin/
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
-RUN curl -sSL https://install.python-poetry.org | python -
 
 WORKDIR /app
-COPY ./pyproject.toml ./poetry.lock ./
-RUN $POETRY_HOME/venv/bin/poetry install --only main --no-root && rm -rf $POETRY_CACHE_DIR
-RUN $POETRY_HOME/venv/bin/poetry version --short > ./version.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-editable
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable
+RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv version --short > ./version.txt
 
 FROM python:3.13-slim
 
 WORKDIR /app
 COPY --from=python-builder-base /app/.venv ./.venv
 COPY --from=python-builder-base /app/version.txt ./version.txt
-COPY ./local_tuya ./local_tuya
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV CONFIG="/app/config/conf.yaml"
