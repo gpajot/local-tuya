@@ -104,11 +104,11 @@ wheels = [
 
 [[package]]
 name = "imbue"
-version = "2.1.2"
+version = "2.1.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8d/23/48432bb7fc49e441968de5e338c027c8f4b5e97a5021bba3c7f4446e083d/imbue-2.1.2.tar.gz", hash = "sha256:3cca3cf1136400d7ef1cae7e42fad27b1b0cb6820a2f637f16f54c09bafaf1a1", size = 14765, upload-time = "2024-10-28T17:33:03.337Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/09/a2523225207103b976fb9d38149dc5cff2fe7169cc7786624cd9718fded2/imbue-2.1.3.tar.gz", hash = "sha256:d9e61ab5988bad2cafdf58662f8bea5fdf439b002bf52e7edf9b423d73327eed", size = 12549, upload-time = "2025-09-07T20:16:22.659Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/7c/829a543d8a49eb911a76d2d7dde56b0a9d74916ef2d0b96a1d306019f3e4/imbue-2.1.2-py3-none-any.whl", hash = "sha256:e784b98a05c41c5a1f9aca15897d315437a56face93accf5003a90fe63d32421", size = 20124, upload-time = "2024-10-28T17:33:01.295Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/ff/01731bf26700795d7024152908702aa187a7cff8141ad08bb3b7d254a3cb/imbue-2.1.3-py3-none-any.whl", hash = "sha256:96c5036707a282c226a42f32761b70fb3e7ac7ca4063c1f2f8a497cd0878eacb", size = 20832, upload-time = "2025-09-07T20:16:21.422Z" },
 ]
 
 [[package]]
