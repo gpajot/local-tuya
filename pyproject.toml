@@ -1,6 +1,6 @@
 [project]
 name = "local_tuya"
-version = "4.0.9"
+version = "4.0.10"
 description = "Control Tuya devices with MQTT over LAN."
 license = "MIT"
 readme = "README.md"
@@ -32,8 +32,6 @@ dev = [
 [tool.mypy]
 check_untyped_defs = true
 ignore_missing_imports = true
-install_types = true
-non_interactive = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 plugins = ["pydantic.mypy"]

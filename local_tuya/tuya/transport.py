@@ -2,6 +2,7 @@ import asyncio
 import logging
 from contextlib import AsyncExitStack
 from functools import partial
+from typing import Optional
 
 from concurrent_tasks import BackgroundTask, RobustStream
 from typing_extensions import Self  # 3.11
@@ -71,6 +72,7 @@ class Transport(AsyncExitStack):
         self._backoff = backoff
         self._separator = separator
         self._notifier = event_notifier
+        self._reader: Optional[asyncio.StreamReader] = None
 
         self._receive_task = BackgroundTask(self._receive)
 
@@ -87,10 +89,13 @@ class Transport(AsyncExitStack):
         self._backoff.reset()
 
     async def _receive(self) -> None:
-        reader = self._stream.reader
-        while True:
-            data = await reader.readuntil(self._separator)
-            await self._notifier.emit(TuyaDataReceived(data))
+        self._reader = self._stream.reader
+        try:
+            while True:
+                data = await self._reader.readuntil(self._separator)
+                await self._notifier.emit(TuyaDataReceived(data))
+        finally:
+            self._reader = None
 
     async def _write(self, data: TuyaDataSent) -> None:
         await self._stream.write(data)
