@@ -1,5 +1,6 @@
 import asyncio
+import sys
 
-from local_tuya.manager import run
+from local_tuya.manager import DeviceManager
 
-asyncio.run(run())
+asyncio.run(DeviceManager(debug="-v" in sys.argv).run())
