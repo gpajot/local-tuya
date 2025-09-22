@@ -1,6 +1,5 @@
 import asyncio
 import logging.config
-import sys
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import AsyncIterator
 
@@ -19,15 +18,16 @@ logger = logging.getLogger(__name__)
 
 
 class DeviceManager(AsyncExitStack):
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         super().__init__()
+        self._debug = debug
         self._stop_event = asyncio.Event()
 
     async def __aenter__(self):
-        logger.debug("initializing...")
         app_container = await self.enter_async_context(
-            load_container().application_context()
+            load_container(self._debug).application_context()
         )
+        logger.debug("initializing...")
         protocol = await app_container.get(Protocol)
         device_configs = await app_container.get(DeviceConfigs)
         devices: dict[str, Device] = {}
@@ -83,32 +83,3 @@ class DeviceManager(AsyncExitStack):
                 tuya_protocol,
             ) as device:
                 yield device
-
-
-async def run():
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "formatters": {
-                "formatter": {
-                    "validate": True,
-                    "format": "%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s",
-                },
-            },
-            "handlers": {
-                "console": {
-                    "class": "logging.StreamHandler",
-                    "formatter": "formatter",
-                    "stream": "ext://sys.stdout",
-                },
-            },
-            "root": {
-                "level": logging.getLevelName(
-                    logging.DEBUG if "-v" in sys.argv else logging.INFO
-                ),
-                "handlers": ["console"],
-            },
-        },
-    )
-    await DeviceManager().run()
