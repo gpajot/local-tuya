@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from local_tuya.events import Event
 from local_tuya.protocol import Values
@@ -11,7 +10,7 @@ class TuyaConnectionEstablished(Event): ...
 
 @dataclass
 class TuyaConnectionClosed(Event):
-    error: Optional[Exception]
+    error: Exception | None
 
 
 class TuyaDataSent(bytes, Event): ...
@@ -29,7 +28,7 @@ class TuyaCommandSent(Event):
 class TuyaResponseReceived(Event):
     sequence_number: int
     response: Response
-    command_class: Optional[type[Command]]
+    command_class: type[Command] | None
 
 
 @dataclass

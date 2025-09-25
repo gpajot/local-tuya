@@ -1,7 +1,6 @@
 import logging
 
 from concurrent_tasks import PeriodicTask
-from typing_extensions import Optional
 
 from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
@@ -35,7 +34,7 @@ class State(PeriodicTask):
         event_notifier.register(TuyaConnectionEstablished, lambda _: self.create())
         self._name = name
         self._notifier = event_notifier
-        self._state: Optional[Values] = None
+        self._state: Values | None = None
 
     def __enter__(self) -> "State":
         """Don't start automatically, only when connection is established."""

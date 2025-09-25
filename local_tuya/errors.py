@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 class LocalTuyaError(Exception):
     """Generic local Tuya error."""
 
@@ -12,7 +9,7 @@ class CommandTimeoutError(LocalTuyaError):
 class ResponseError(LocalTuyaError):
     """Generic error in responses"""
 
-    def __init__(self, message: str = "", cause: Optional[Exception] = None):
+    def __init__(self, message: str = "", cause: Exception | None = None):
         super().__init__(message)
         if cause:
             self.__cause__ = cause

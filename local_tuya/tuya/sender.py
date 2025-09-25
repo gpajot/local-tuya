@@ -2,7 +2,6 @@ import asyncio
 import logging
 from contextlib import AbstractContextManager
 from functools import partial
-from typing import Optional
 
 from concurrent_tasks import RestartableTask
 
@@ -37,7 +36,7 @@ class Sender(AbstractContextManager):
         self._handler = message_handler
         self._timeout = timeout
         self._pending_tasks: dict[
-            tuple[int, Optional[type[Command]]], RestartableTask[None]
+            tuple[int, type[Command] | None], RestartableTask[None]
         ] = {}
         self._can_send = asyncio.Event()
         self._sequence_number = 0

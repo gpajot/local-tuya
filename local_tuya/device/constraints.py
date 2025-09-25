@@ -1,9 +1,7 @@
-from typing import Optional
-
 from local_tuya.protocol import Value, Values
 
-Blacklist = dict[str, Optional[set[Value]]]
-_Blacklist = dict[str, set[Value]]
+type Blacklist = dict[str, set[Value] | None]
+type _Blacklist = dict[str, set[Value]]
 
 
 class Constraint:
@@ -13,7 +11,7 @@ class Constraint:
         self,
         data_point: str,
         value: Value,
-        *blacklist: tuple[str, Optional[set[Value]]],
+        *blacklist: tuple[str, set[Value] | None],
     ):
         self._data_point = data_point
         self._value = value

@@ -1,24 +1,21 @@
 import inspect
 from collections import defaultdict
-from typing import Any, Awaitable, Callable, DefaultDict, List, Type, TypeVar, cast
-
-from typing_extensions import ParamSpec
+from typing import Any, Awaitable, Callable, DefaultDict, cast
 
 
 class Event:
     """Base event class"""
 
 
-T = TypeVar("T", bound=Event)
-
-
 class EventNotifier:
     def __init__(self):
         self._listeners: DefaultDict[
-            Type[Event], List[Callable[[Event], Awaitable[None]]]
+            type[Event], list[Callable[[Event], Awaitable[None]]]
         ] = defaultdict(list)
 
-    def register(self, event_class: Type[T], listener: Callable[[T], Any]) -> None:
+    def register[T: Event](
+        self, event_class: type[T], listener: Callable[[T], Any]
+    ) -> None:
         self._listeners[event_class].append(
             cast(
                 Callable[[Event], Awaitable[None]],
@@ -31,10 +28,7 @@ class EventNotifier:
             await listener(event)
 
 
-P = ParamSpec("P")
-
-
-def _make_async(func: Callable[P, Any]) -> Callable[P, Awaitable[None]]:
+def _make_async[**P](func: Callable[P, Any]) -> Callable[P, Awaitable[None]]:
     async def _wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
         res = func(*args, **kwargs)
         if inspect.iscoroutine(res):

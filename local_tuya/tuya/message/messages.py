@@ -1,38 +1,36 @@
 from dataclasses import dataclass
-from typing import Union
-
-from typing_extensions import Optional, Protocol
+from typing import Protocol
 
 from local_tuya.errors import DecodeResponseError, ResponseError
 from local_tuya.protocol import Value, Values
 
-Payload = dict[str, Union[Value, Values]]
+Payload = dict[str, Value | Values]
 
 
 class Command(Protocol):
     @property
-    def payload(self) -> Optional[Payload]:
+    def payload(self) -> Payload | None:
         return None
 
 
 class Response(Protocol):
     @property
-    def error(self) -> Optional[ResponseError]:
+    def error(self) -> ResponseError | None:
         return None
 
 
 class EmptyCommand:
     @property
-    def payload(self) -> Optional[Payload]:
+    def payload(self) -> Payload | None:
         return None
 
 
 @dataclass
 class EmptyResponse:
-    _error: Optional[ResponseError] = None
+    _error: ResponseError | None = None
 
     @property
-    def error(self) -> Optional[ResponseError]:
+    def error(self) -> ResponseError | None:
         return self._error
 
 
@@ -45,8 +43,8 @@ class HeartbeatResponse(EmptyResponse): ...
 class StatusResponse:
     def __init__(
         self,
-        payload: Optional[Payload] = None,
-        error: Optional[ResponseError] = None,
+        payload: Payload | None = None,
+        error: ResponseError | None = None,
     ):
         self.error = error
         self.values: Values = {}

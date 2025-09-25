@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Optional, cast
+from typing import cast
 
 from local_tuya.events import EventNotifier
 from local_tuya.protocol import Values
@@ -13,7 +13,7 @@ class StateHandler:
     def __init__(self, name: str, event_notifier: EventNotifier):
         event_notifier.register(TuyaStateUpdated, self._set)
         self._name = name
-        self._state: Optional[Values] = None
+        self._state: Values | None = None
         self._updated = asyncio.Event()
 
     def _set(self, event: TuyaStateUpdated) -> None:

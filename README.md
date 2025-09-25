@@ -1,8 +1,6 @@
 # local-tuya
 
 [![tests](https://github.com/gpajot/local-tuya/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![PyPi](https://img.shields.io/pypi/v/local_tuya?label=stable)](https://pypi.org/project/local_tuya/)
-[![python](https://img.shields.io/pypi/pyversions/local_tuya)](https://pypi.org/project/local_tuya/)
 [![DockerHub](https://img.shields.io/docker/v/gpajot/local-tuya/latest)](https://hub.docker.com/r/gpajot/local-tuya)
 
 Control Tuya devices with MQTT over LAN.
@@ -32,10 +30,8 @@ Control Tuya devices with MQTT over LAN.
 The easiest way is to use the Docker image:
 
 ```commandline
-docker run -v {PATH_TO_CONFIG}:/app/conf.yaml:ro gpajot/local-tuya
+docker run -v $CONFIG_DIR:/app/config:ro gpajot/local-tuya
 ```
-
-Alternatively, you can use the python package and run directly: `CONFIG=path/to/config python -m local-tuya.manager`
 
 ### Configuration
 

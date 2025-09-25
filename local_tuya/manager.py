@@ -6,7 +6,7 @@ from typing import AsyncIterator
 from concurrent_tasks import BackgroundTask, LoopExceptionHandler
 from imbue import Container
 
-from local_tuya.config import DeviceConfigs
+from local_tuya.config import Config
 from local_tuya.contrib import FullDeviceConfig
 from local_tuya.dependencies import load_container
 from local_tuya.device import Device
@@ -18,26 +18,25 @@ logger = logging.getLogger(__name__)
 
 
 class DeviceManager(AsyncExitStack):
-    def __init__(self, debug: bool = False):
+    def __init__(self, config: Config):
         super().__init__()
-        self._debug = debug
+        self._cfg = config
         self._stop_event = asyncio.Event()
 
     async def __aenter__(self):
         app_container = await self.enter_async_context(
-            load_container(self._debug).application_context()
+            load_container(self._cfg).application_context()
         )
         logger.debug("initializing...")
         protocol = await app_container.get(Protocol)
-        device_configs = await app_container.get(DeviceConfigs)
         devices: dict[str, Device] = {}
-        for device_config in device_configs:
+        for device_config in self._cfg.devices:
             device = await self.enter_async_context(
                 self._create_and_run_device(device_config, protocol)
             )
             devices[device_config.config.tuya.id_] = device
         self.enter_context(BackgroundTask(self._receive_commands, protocol, devices))
-        logger.info("initialized %d device(s)", len(device_configs))
+        logger.info("initialized %d device(s)", len(self._cfg.devices))
 
     async def _stop(self) -> None:
         self._stop_event.set()

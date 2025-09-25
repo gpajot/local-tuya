@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from typing import Optional
 
 from concurrent_tasks import BackgroundTask
 
@@ -22,7 +21,7 @@ class UpdateBuffer(BackgroundTask):
         confirm_timeout: float,
         protocol: TuyaProtocol,
         state_handler: StateHandler,
-        constraints: Optional[Constraints],
+        constraints: Constraints | None,
     ):
         super().__init__(self._update)
         self._name = device_name
@@ -34,7 +33,7 @@ class UpdateBuffer(BackgroundTask):
         self._buffer: Values = {}
         # Used to know we are currently performing an update.
         self._lock = asyncio.Lock()
-        self._updated: Optional[asyncio.Future[None]] = None
+        self._updated: asyncio.Future[None] | None = None
 
     async def update(self, values: Values) -> None:
         filtered = await self._filter({**self._buffer, **values})

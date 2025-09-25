@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from local_tuya.tuya.config import TuyaConfig
 from local_tuya.tuya.message.messages import Command, Response
@@ -10,7 +12,7 @@ class MessageHandler(ABC):
 
     @staticmethod
     @abstractmethod
-    def from_config(config: TuyaConfig) -> Optional["MessageHandler"]:
+    def from_config(config: TuyaConfig) -> MessageHandler | None:
         """Create the handler if it supports the device."""
 
     @abstractmethod
@@ -20,5 +22,5 @@ class MessageHandler(ABC):
     @abstractmethod
     def unpack(
         self, data: bytes
-    ) -> tuple[int, Optional[Response], Optional[type[Command]], bytes]:
+    ) -> tuple[int, Response | None, type[Command] | None, bytes]:
         """Extract message from the bytes received, also return unused remaining bytes."""
