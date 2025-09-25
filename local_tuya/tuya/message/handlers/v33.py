@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import binascii
 import json
 import logging
 import struct
-from typing import Callable, ClassVar, Optional
+from typing import Callable, ClassVar
 
 from local_tuya.errors import DecodeResponseError, LocalTuyaError, ResponseError
 from local_tuya.tuya.config import TuyaConfig, TuyaVersion
@@ -42,7 +44,7 @@ class V33MessageHandler(MessageHandler):
         StateCommand: 10,
     }
     RESPONSES: ClassVar[
-        dict[int, Callable[[Optional[Payload], Optional[ResponseError]], Response]]
+        dict[int, Callable[[Payload | None, ResponseError | None], Response]]
     ] = {
         7: lambda p, e: UpdateResponse(e),
         8: StatusResponse,
@@ -62,7 +64,7 @@ class V33MessageHandler(MessageHandler):
         self._version_header = config.version + self.VERSION_HEADER
 
     @staticmethod
-    def from_config(config: TuyaConfig) -> Optional["MessageHandler"]:
+    def from_config(config: TuyaConfig) -> MessageHandler | None:
         if config.version is TuyaVersion.v33:
             return V33MessageHandler(config)
 
@@ -107,7 +109,7 @@ class V33MessageHandler(MessageHandler):
 
     def unpack(
         self, data: bytes
-    ) -> tuple[int, Optional[Response], Optional[type[Command]], bytes]:
+    ) -> tuple[int, Response | None, type[Command] | None, bytes]:
         header_length = struct.calcsize(self.HEADER_FMT)
 
         # Header.
@@ -151,8 +153,8 @@ class V33MessageHandler(MessageHandler):
             payload_content = payload[return_code_length:-end_length]
             if payload_content.startswith(self._cfg.version):
                 payload_content = payload_content[len(self._version_header) :]
-            parsed_payload: Optional[Payload] = None
-            error: Optional[ResponseError] = None
+            parsed_payload: Payload | None = None
+            error: ResponseError | None = None
             if return_code:
                 # Use the payload content as the error description.
                 error = ResponseError(payload_content.decode())

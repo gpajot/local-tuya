@@ -1,14 +1,12 @@
 """Utilities to alter how device values are reported."""
 
 import time
-from typing import Callable, Optional, TypeVar
+from typing import Callable
 
-T = TypeVar("T")
-
-ValueProcessor = Callable[[T], T]
+type ValueProcessor[T] = Callable[[T], T]
 
 
-def compose(*processors: ValueProcessor[T]) -> ValueProcessor[T]:
+def compose[T](*processors: ValueProcessor[T]) -> ValueProcessor[T]:
     """Compose multiple processors.
     They are applied in the order in which they are passed.
 
@@ -38,7 +36,7 @@ def moving_average(n: int) -> ValueProcessor[float]:
 
 def debounce(s: float) -> ValueProcessor[float]:
     """Debounce the updates and return the first value within a period of s seconds."""
-    last: Optional[float] = None
+    last: float | None = None
     last_time: float = 0
 
     def _wrapper(value: float) -> float:

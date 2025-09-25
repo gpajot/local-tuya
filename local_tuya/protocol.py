@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import AsyncIterator, Collection, Optional, Union
+from typing import AsyncIterator, Collection
 
-from typing_extensions import TypeAlias
-
-Value: TypeAlias = Union[bool, int, float, str]
-Values: TypeAlias = dict[str, Value]
+type Value = bool | int | float | str
+type Values = dict[str, Value]
 
 
 @dataclass
@@ -46,7 +44,7 @@ class DeviceDiscovery:
 
     def filter_components(
         self,
-        included: Optional[Collection[str]],
+        included: Collection[str] | None,
     ) -> "DeviceDiscovery":
         if included is None:
             return self

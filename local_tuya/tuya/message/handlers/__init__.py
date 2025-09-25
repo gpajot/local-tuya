@@ -1,10 +1,8 @@
-from typing import List, Type
-
 from local_tuya.tuya.config import TuyaConfig
 from local_tuya.tuya.message.handlers.handler import MessageHandler
 from local_tuya.tuya.message.handlers.v33 import V33MessageHandler
 
-HANDLERS: List[Type[MessageHandler]] = [
+HANDLERS: list[type[MessageHandler]] = [
     V33MessageHandler,
 ]
 

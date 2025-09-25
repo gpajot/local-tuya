@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 from local_tuya.backoff import Backoff, SequenceBackoff
@@ -21,8 +19,8 @@ class MQTTConfig(BaseModel):
     discovery_prefix: str
     hostname: str
     port: int = 1883
-    username: Optional[str] = None
-    password: Optional[str] = None
+    username: str | None = None
+    password: str | None = None
     timeout: float = 5
     keepalive: int = 60
     backoff: Backoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)

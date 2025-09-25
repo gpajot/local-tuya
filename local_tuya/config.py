@@ -1,18 +1,15 @@
 from typing import Any
 
 from pydantic import BaseModel, Field
-from typing_extensions import TypeAlias
 from zenconfig import ReadOnlyConfig
 
 from local_tuya.contrib import FullDeviceConfig
 from local_tuya.mqtt import MQTTConfig
 
-DeviceConfigs: TypeAlias = tuple[FullDeviceConfig, ...]
-
 
 class Config(BaseModel, ReadOnlyConfig):
     mqtt: MQTTConfig
-    devices: DeviceConfigs
+    devices: tuple[FullDeviceConfig, ...]
     logging: dict[str, Any] = Field(
         default_factory=lambda: {
             "version": 1,

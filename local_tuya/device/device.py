@@ -3,7 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
 from functools import partial
-from typing import ClassVar, Collection, Optional, Union
+from typing import ClassVar, Collection
 
 from concurrent_tasks import TaskPool
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class Device(AsyncExitStack, ABC):
     DISCOVERY: ClassVar[DeviceDiscovery]
-    CONSTRAINTS: ClassVar[Optional[Constraints]] = None
+    CONSTRAINTS: ClassVar[Constraints | None] = None
 
     def __init__(
         self,
@@ -66,7 +66,7 @@ class Device(AsyncExitStack, ABC):
     @classmethod
     @abstractmethod
     def filter_data_points(
-        cls, included_components: Optional[Collection[str]]
+        cls, included_components: Collection[str] | None
     ) -> set[str]: ...
 
     @abstractmethod
@@ -105,7 +105,7 @@ class Device(AsyncExitStack, ABC):
         )
 
     def _set_availability(
-        self, event: Union[TuyaConnectionEstablished, TuyaConnectionClosed]
+        self, event: TuyaConnectionEstablished | TuyaConnectionClosed
     ) -> None:
         self._check_future(
             self._send_task_pool.create_task(

@@ -2,10 +2,9 @@ import asyncio
 import logging
 from contextlib import AsyncExitStack
 from functools import partial
-from typing import Optional
+from typing import Self
 
 from concurrent_tasks import BackgroundTask, RobustStream
-from typing_extensions import Self  # 3.11
 
 from local_tuya.backoff import Backoff
 from local_tuya.events import EventNotifier
@@ -72,7 +71,7 @@ class Transport(AsyncExitStack):
         self._backoff = backoff
         self._separator = separator
         self._notifier = event_notifier
-        self._reader: Optional[asyncio.StreamReader] = None
+        self._reader: asyncio.StreamReader | None = None
 
         self._receive_task = BackgroundTask(self._receive)
 

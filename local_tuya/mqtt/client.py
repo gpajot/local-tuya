@@ -3,7 +3,7 @@ import contextlib
 import json
 import logging
 from time import time_ns
-from typing import Any, AsyncIterator, Optional, Union
+from typing import Any, AsyncIterator
 
 import aiomqtt
 import paho.mqtt.client as mqtt
@@ -105,7 +105,7 @@ class MQTTClient(Protocol):
         userdata: Any,
         flags: mqtt.DisconnectFlags,
         reason_code: mqtt_rc.ReasonCode,
-        properties: Optional[mqtt_props.Properties] = None,
+        properties: mqtt_props.Properties | None = None,
     ) -> None:
         self._original_on_disconnect(client, userdata, flags, reason_code, properties)  # type: ignore[call-arg, arg-type]
         if reason_code == mqtt.MQTT_ERR_SUCCESS:
@@ -133,9 +133,7 @@ class MQTTClient(Protocol):
             except aiomqtt.MqttError as e:
                 logger.warning("error receiving messages: %s", e)
 
-    def _process_message(
-        self, message: aiomqtt.Message
-    ) -> Optional[tuple[str, Values]]:
+    def _process_message(self, message: aiomqtt.Message) -> tuple[str, Values] | None:
         logger.debug(
             "received message in %s: %s",
             message.topic.value,
@@ -210,7 +208,7 @@ class MQTTClient(Protocol):
     async def _publish(
         self,
         topic: str,
-        payload: Union[str, bytes],
+        payload: str | bytes,
         *,
         retain: bool = False,
     ):

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Collection, Optional
+from typing import Collection
 
 from local_tuya.device import (
     Constraint,
@@ -193,7 +193,7 @@ class AirtonACDevice(Device):
     @classmethod
     def filter_data_points(
         cls,
-        included_components: Optional[Collection[str]],
+        included_components: Collection[str] | None,
     ) -> set[str]:
         return {
             e
