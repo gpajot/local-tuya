@@ -2,7 +2,7 @@ import asyncio.transports
 
 import pytest
 
-from local_tuya.backoff import Backoff
+from local_tuya.backoff import SequenceBackoff
 from local_tuya.tuya.events import (
     TuyaDataReceived,
     TuyaDataSent,
@@ -13,7 +13,7 @@ from local_tuya.tuya.transport import Transport, TuyaStream
 class TestTransport:
     @pytest.fixture
     def backoff(self, mocker):
-        return mocker.MagicMock(spec=Backoff)
+        return mocker.MagicMock(spec=SequenceBackoff)
 
     @pytest.fixture
     def reader(self, mocker):

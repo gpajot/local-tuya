@@ -4,7 +4,7 @@ from unittest.mock import call
 import paho.mqtt.client as mqtt
 import pytest
 
-from local_tuya.backoff import Backoff
+from local_tuya.backoff import SequenceBackoff
 from local_tuya.mqtt.client import MQTTClient
 from local_tuya.mqtt.config import MQTTConfig
 
@@ -12,17 +12,13 @@ from local_tuya.mqtt.config import MQTTConfig
 class TestMQTTClient:
     @pytest.fixture
     def backoff(self, mocker):
-        return mocker.MagicMock(spec=Backoff)
+        return mocker.MagicMock(spec=SequenceBackoff)
 
     @pytest.fixture
-    async def client(self, backoff):
-        return MQTTClient(
-            MQTTConfig(
-                discovery_prefix="discover",
-                hostname="address",
-                backoff=backoff,
-            ),
-        )
+    async def client(self, mocker, backoff):
+        config = MQTTConfig(discovery_prefix="discover", hostname="address")
+        mocker.patch.object(config, "backoff", new=backoff)
+        return MQTTClient(config)
 
     @pytest.fixture
     async def aenter_future(self):
@@ -67,7 +63,7 @@ class TestMQTTClient:
 
     async def test_publish_disconnected(self, client):
         with pytest.raises(RuntimeError, match="client is closed"):
-            await client._publish("test-topic", {})
+            await client._publish("test-topic", "")
 
     async def test_publish_connected(self, connected_client, mock_client):
         await connected_client._publish("test-topic", "{}")

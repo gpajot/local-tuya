@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
-from local_tuya.backoff import Backoff, SequenceBackoff
+from local_tuya.backoff import SequenceBackoff
 
 DRIVER_PREFIX = "local-tuya"
 
@@ -14,8 +14,6 @@ def get_status_topic(device_id: str) -> str:
 
 
 class MQTTConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     discovery_prefix: str
     hostname: str
     port: int = 1883
@@ -23,4 +21,4 @@ class MQTTConfig(BaseModel):
     password: str | None = None
     timeout: float = 5
     keepalive: int = 60
-    backoff: Backoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
+    backoff: SequenceBackoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
