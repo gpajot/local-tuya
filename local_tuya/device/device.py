@@ -10,7 +10,6 @@ from concurrent_tasks import TaskPool
 from local_tuya.device.buffer import UpdateBuffer
 from local_tuya.device.config import DeviceConfig
 from local_tuya.device.constraints import Constraints
-from local_tuya.device.state import StateHandler
 from local_tuya.events import EventNotifier
 from local_tuya.protocol import DeviceDiscovery, Protocol, Values
 from local_tuya.tuya import (
@@ -44,24 +43,19 @@ class Device(AsyncExitStack, ABC):
         self._buffer = UpdateBuffer(
             device_name=self._name,
             delay=config.debounce_updates,
-            confirm_timeout=config.confirm_timeout,
             protocol=tuya_protocol,
-            state_handler=StateHandler(self._name, event_notifier),
+            event_notifier=event_notifier,
             constraints=self.CONSTRAINTS,
+            retries=config.retries,
+            retry_backoff=config.retry_backoff,
         )
         event_notifier.register(TuyaStateUpdated, self._update_state)
         event_notifier.register(TuyaConnectionEstablished, self._set_availability)
         event_notifier.register(TuyaConnectionClosed, self._set_availability)
 
         # Run in task pools to buffer traffic and avoid blocking the device.
-        self._send_task_pool = TaskPool(
-            size=1,
-            timeout=self._protocol.timeout,
-        )
-        self._receive_task_pool = TaskPool(
-            size=1,
-            timeout=config.tuya.timeout + config.confirm_timeout,
-        )
+        self._protocol_pool = TaskPool(size=2, timeout=self._protocol.timeout)
+        self._tuya_pool = TaskPool(size=2, timeout=config.tuya.timeout)
 
     @classmethod
     @abstractmethod
@@ -77,11 +71,11 @@ class Device(AsyncExitStack, ABC):
 
     async def __aenter__(self):
         logger.debug("%s: initializing...", self._name)
-        await self.enter_async_context(self._send_task_pool)
-        await self.enter_async_context(self._receive_task_pool)
+        await self.enter_async_context(self._protocol_pool)
+        await self.enter_async_context(self._tuya_pool)
         if self._cfg.enable_discovery:
             self._check_future(
-                self._send_task_pool.create_task(
+                self._protocol_pool.create_task(
                     self._protocol.send_discovery(
                         self.DISCOVERY.filter_components(self._cfg.included_components),
                         self._cfg.tuya.id_,
@@ -90,7 +84,7 @@ class Device(AsyncExitStack, ABC):
                 ),
                 task="sending discovery",
             )
-        self.callback(self._buffer.cancel)
+        self.callback(self._buffer.close)
         await self.enter_async_context(self._tuya_protocol.initialize())
         return self
 
@@ -98,7 +92,7 @@ class Device(AsyncExitStack, ABC):
         state = self._from_tuya_payload(event.values)
         logger.debug("%s: received new device state: %s", self._name, state)
         self._check_future(
-            self._send_task_pool.create_task(
+            self._protocol_pool.create_task(
                 self._protocol.send_state(self._cfg.tuya.id_, state),
             ),
             task="sending state update",
@@ -108,7 +102,7 @@ class Device(AsyncExitStack, ABC):
         self, event: TuyaConnectionEstablished | TuyaConnectionClosed
     ) -> None:
         self._check_future(
-            self._send_task_pool.create_task(
+            self._protocol_pool.create_task(
                 self._protocol.set_availability(
                     self._cfg.tuya.id_,
                     isinstance(event, TuyaConnectionEstablished),
@@ -130,7 +124,7 @@ class Device(AsyncExitStack, ABC):
             return
         logger.debug("%s: received command: %s", self._name, tuya_payload)
         self._check_future(
-            self._receive_task_pool.create_task(self._buffer.update(tuya_payload)),
+            self._tuya_pool.create_task(self._buffer.update(tuya_payload)),
             task="sending command to device",
         )
 

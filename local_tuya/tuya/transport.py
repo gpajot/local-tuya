@@ -6,7 +6,7 @@ from typing import Self
 
 from concurrent_tasks import BackgroundTask, RobustStream
 
-from local_tuya.backoff import Backoff
+from local_tuya.backoff import SequenceBackoff
 from local_tuya.events import EventNotifier
 from local_tuya.tuya.events import (
     TuyaConnectionClosed,
@@ -25,7 +25,7 @@ class TuyaStream(RobustStream):
         name: str,
         address: str,
         port: int,
-        backoff: Backoff,
+        backoff: SequenceBackoff,
         timeout: float,
         event_notifier: EventNotifier,
     ):
@@ -59,7 +59,7 @@ class Transport(AsyncExitStack):
         address: str,
         port: int,
         separator: bytes,
-        backoff: Backoff,
+        backoff: SequenceBackoff,
         timeout: float,
         event_notifier: EventNotifier,
     ):
