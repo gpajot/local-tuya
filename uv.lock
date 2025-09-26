@@ -53,14 +53,14 @@ wheels = [
 
 [[package]]
 name = "concurrent-tasks"
-version = "1.16.1"
+version = "1.16.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/09/43/1c576bea726188c900a919792d94259195d2bc992f172e89a8042046ee20/concurrent_tasks-1.16.1.tar.gz", hash = "sha256:cac9b9167697fe559b7efda1302c55ce6e46b11bb3e1522a5af4e4231cdc2459", size = 12914, upload-time = "2025-09-22T07:27:10.524Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/66/7e13d6970a531186f4507e76977e0bc8c642740766c3520589c4a17a5774/concurrent_tasks-1.16.2.tar.gz", hash = "sha256:168d756e4bd8443ebc2740c1f427f9b7ca09c88d0da905ea6b38405e31fc5555", size = 12926, upload-time = "2025-09-25T07:16:49.721Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/8c/711494560a31c9582ef006ee11065879739cd0c265357177488ce56c5ff8/concurrent_tasks-1.16.1-py3-none-any.whl", hash = "sha256:4c8aa98c29ded78a489151ca5ac4c514188d1190250247773b009f2a3b710e01", size = 21046, upload-time = "2025-09-22T07:27:09.03Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/24/fca18a17d461faf0aaa5bb83446cc444756a34721113603e240130f24074/concurrent_tasks-1.16.2-py3-none-any.whl", hash = "sha256:8a1e10255b4f6f630dbb43700b49a87d93710d3a7762814e7153acc9586150d1", size = 21055, upload-time = "2025-09-25T07:16:48.478Z" },
 ]
 
 [[package]]
