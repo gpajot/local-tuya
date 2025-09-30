@@ -1,6 +1,6 @@
 [project]
 name = "local_tuya"
-version = "5.0.1"
+version = "5.0.2"
 description = "Control Tuya devices with MQTT over LAN."
 license = "MIT"
 readme = "README.md"

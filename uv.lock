@@ -100,7 +100,7 @@ wheels = [
 
 [[package]]
 name = "local-tuya"
-version = "5.0.1"
+version = "5.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiomqtt", marker = "python_full_version < '4'" },
