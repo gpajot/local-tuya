@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import AsyncIterator, Collection
+from typing import AsyncIterator, Collection, Self
 
 type Value = bool | int | float | str
 type Values = dict[str, Value]
@@ -45,10 +45,10 @@ class DeviceDiscovery:
     def filter_components(
         self,
         included: Collection[str] | None,
-    ) -> "DeviceDiscovery":
+    ) -> Self:
         if included is None:
             return self
-        return DeviceDiscovery(
+        return type(self)(
             model=self.model,
             components=tuple(c for c in self.components if c.property in included),
         )

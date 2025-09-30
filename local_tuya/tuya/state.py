@@ -1,4 +1,5 @@
 import logging
+from typing import Self
 
 from concurrent_tasks import PeriodicTask
 
@@ -36,7 +37,7 @@ class State(PeriodicTask):
         self._notifier = event_notifier
         self._state: Values | None = None
 
-    def __enter__(self) -> "State":
+    def __enter__(self) -> Self:
         """Don't start automatically, only when connection is established."""
         return self
 

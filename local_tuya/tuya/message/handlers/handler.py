@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from local_tuya.tuya.config import TuyaConfig
 from local_tuya.tuya.message.messages import Command, Response
@@ -10,9 +8,9 @@ from local_tuya.tuya.message.messages import Command, Response
 class MessageHandler(ABC):
     SUFFIX: ClassVar[int]
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def from_config(config: TuyaConfig) -> MessageHandler | None:
+    def from_config(cls, config: TuyaConfig) -> Self | None:
         """Create the handler if it supports the device."""
 
     @abstractmethod
