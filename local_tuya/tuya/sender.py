@@ -43,6 +43,7 @@ class Sender(AbstractContextManager):
     def _connection_lost(self, event: TuyaConnectionClosed) -> None:
         for future in self._pending.values():
             future.set_exception(event.error or ConnectionError("disconnected"))
+        self._pending = {}
 
     def _receive_response(self, event: TuyaResponseReceived) -> None:
         if event.command_class is None:
