@@ -87,7 +87,7 @@ class MQTTClient(Protocol):
                 await self._client.__aenter__()
                 break
             except Exception:
-                logger.warning("could not connect, retrying...", exc_info=True)
+                logger.error("could not connect, retrying...", exc_info=True)
         self._backoff.reset()
         self._connected.set()
         # Send birth message and subscribe to commands.
