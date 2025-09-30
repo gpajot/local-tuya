@@ -115,7 +115,7 @@ class Device(AsyncExitStack, ABC):
         try:
             tuya_payload = self._to_tuya_payload(payload)
         except Exception:
-            logger.warning(
+            logger.error(
                 "%s: could no load tuya payload from %s",
                 self._name,
                 payload,

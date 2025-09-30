@@ -30,7 +30,7 @@ class Receiver:
             remaining,
         ) = self._handler.unpack(data)
         if not response:
-            logger.warning("%s: received incomplete message", self._name)
+            logger.error("%s: received incomplete message", self._name)
             return
         if remaining:
             logger.warning("%s: received a message larger than expected")
