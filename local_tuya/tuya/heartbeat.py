@@ -1,4 +1,5 @@
 import logging
+from typing import Self
 
 from concurrent_tasks import PeriodicTask
 
@@ -16,18 +17,23 @@ logger = logging.getLogger(__name__)
 
 class Heartbeat(PeriodicTask):
     def __init__(self, name: str, interval: float, event_notifier: EventNotifier):
-        super().__init__(interval, _heartbeat, name, event_notifier)
+        super().__init__(interval, self._heartbeat)
         event_notifier.register(TuyaConnectionClosed, lambda _: self.cancel())
         event_notifier.register(TuyaConnectionEstablished, lambda _: self.create())
         self._name = name
+        self._notifier = event_notifier
+        self._missed = False
 
-    def __enter__(self) -> "Heartbeat":
+    def __enter__(self) -> Self:
         """Don't start automatically, only when connection is established."""
         return self
 
-
-async def _heartbeat(name: str, event_notifier: EventNotifier) -> None:
-    try:
-        await event_notifier.emit(TuyaCommandSent(HeartbeatCommand()))
-    except CommandTimeoutError:
-        logger.warning("%s: timeout waiting for heartbeat response", name)
+    async def _heartbeat(self) -> None:
+        try:
+            await self._notifier.emit(TuyaCommandSent(HeartbeatCommand()))
+            self._missed = False
+        except CommandTimeoutError:
+            (logger.warning if self._missed else logger.debug)(
+                "%s: timeout waiting for heartbeat response", self._name
+            )
+            self._missed = True

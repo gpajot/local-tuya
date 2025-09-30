@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import binascii
 import json
 import logging
 import struct
-from typing import Callable, ClassVar
+from typing import Callable, ClassVar, Self
 
 from local_tuya.errors import DecodeResponseError, LocalTuyaError, ResponseError
 from local_tuya.tuya.config import TuyaConfig, TuyaVersion
@@ -63,10 +61,10 @@ class V33MessageHandler(MessageHandler):
         self._cipher = AESCipher(config.key)
         self._version_header = config.version + self.VERSION_HEADER
 
-    @staticmethod
-    def from_config(config: TuyaConfig) -> MessageHandler | None:
+    @classmethod
+    def from_config(cls, config: TuyaConfig) -> Self:
         if config.version is TuyaVersion.v33:
-            return V33MessageHandler(config)
+            return cls(config)
 
     def pack(self, sequence_number: int, command: Command) -> bytes:
         if type(command) not in self.COMMANDS:

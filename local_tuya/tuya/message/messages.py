@@ -4,7 +4,7 @@ from typing import Protocol
 from local_tuya.errors import DecodeResponseError, ResponseError
 from local_tuya.protocol import Value, Values
 
-Payload = dict[str, Value | Values]
+type Payload = dict[str, Value | Values]
 
 
 class Command(Protocol):
