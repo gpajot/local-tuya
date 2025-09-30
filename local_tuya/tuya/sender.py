@@ -42,15 +42,18 @@ class Sender(AbstractContextManager):
 
     def _connection_lost(self, event: TuyaConnectionClosed) -> None:
         for future in self._pending.values():
-            future.set_exception(event.error or ConnectionError("disconnected"))
+            if not future.done():
+                future.set_exception(event.error or ConnectionError("disconnected"))
         self._pending = {}
 
     def _receive_response(self, event: TuyaResponseReceived) -> None:
         if event.command_class is None:
             return
-        if future := self._pending.pop(
-            (event.sequence_number, event.command_class), None
-        ):
+        if (
+            future := self._pending.pop(
+                (event.sequence_number, event.command_class), None
+            )
+        ) and not future.done():
             if event.response.error:
                 future.set_exception(event.response.error)
             else:
@@ -72,6 +75,8 @@ class Sender(AbstractContextManager):
         future = asyncio.Future[None]()
         key = (sequence_number, type(event.command))
         future.add_done_callback(partial(self._done_callback, key))
+        if (other := self._pending.get(key)) and not other.done():
+            other.cancel()
         self._pending[key] = future
         try:
             async with asyncio.timeout(self._timeout):
