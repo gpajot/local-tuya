@@ -11,6 +11,7 @@ from local_tuya.events import EventNotifier
 from local_tuya.tuya.events import (
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
+    TuyaConnectionReset,
     TuyaDataReceived,
     TuyaDataSent,
     TuyaResponseReceived,
@@ -39,17 +40,25 @@ class TuyaStream(RobustStream):
             backoff=backoff.wait,
             timeout=timeout,
         )
+        event_notifier.register(TuyaConnectionReset, self._reconnect)
         self._notifier = event_notifier
+        self._first_connect = True
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self._notifier.emit(TuyaConnectionClosed(None))
         await super().__aexit__(exc_type, exc_val, exc_tb)
 
     async def _connect(self) -> None:
-        if self._last_exc:
+        if self._first_connect:
+            self._first_connect = False
+        else:
             await self._notifier.emit(TuyaConnectionClosed(self._last_exc))
         await super()._connect()
         await self._notifier.emit(TuyaConnectionEstablished())
+
+    def _reconnect(self, _: TuyaConnectionReset) -> None:
+        if self._transport:
+            self._transport.close()
 
 
 class Transport(AsyncExitStack):

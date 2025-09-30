@@ -9,6 +9,7 @@ from local_tuya.tuya.events import (
     TuyaCommandSent,
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
+    TuyaConnectionReset,
 )
 from local_tuya.tuya.message import HeartbeatCommand
 
@@ -33,7 +34,12 @@ class Heartbeat(PeriodicTask):
             await self._notifier.emit(TuyaCommandSent(HeartbeatCommand()))
             self._missed = False
         except CommandTimeoutError:
-            (logger.warning if self._missed else logger.debug)(
-                "%s: timeout waiting for heartbeat response", self._name
-            )
-            self._missed = True
+            if self._missed:
+                logger.warning(
+                    "%s: second timeout waiting for heartbeat response, reconnecting",
+                    self._name,
+                )
+                await self._notifier.emit(TuyaConnectionReset())
+            else:
+                logger.info("%s: timeout waiting for heartbeat response", self._name)
+                self._missed = True

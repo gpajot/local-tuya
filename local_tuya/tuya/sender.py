@@ -35,9 +35,7 @@ class Sender(AbstractContextManager):
         self._notifier = event_notifier
         self._handler = message_handler
         self._timeout = timeout
-        self._pending_tasks: dict[
-            tuple[int, type[Command] | None], RestartableTask[None]
-        ] = {}
+        self._pending_tasks: dict[tuple[int, type[Command]], RestartableTask[None]] = {}
         self._can_send = asyncio.Event()
         self._sequence_number = 0
 
@@ -59,6 +57,8 @@ class Sender(AbstractContextManager):
             task.cancel()
 
     def _receive_response(self, event: TuyaResponseReceived) -> None:
+        if event.command_class is None:
+            return
         task = self._pending_tasks.pop(
             (event.sequence_number, event.command_class), None
         )
@@ -86,11 +86,12 @@ class Sender(AbstractContextManager):
             partial(self._notifier.emit, TuyaDataSent(data)),
             timeout=self._timeout,
         )
-        task.start()
         self._pending_tasks[(sequence_number, type(event.command))] = task
+        task.start()
         try:
             await task
         except asyncio.TimeoutError as e:
+            self._pending_tasks.pop((sequence_number, type(event.command)), None)
             raise CommandTimeoutError() from e
 
     def _get_sequence_number(self, command: Command) -> int:
