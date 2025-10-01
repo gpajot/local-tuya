@@ -101,7 +101,7 @@ class Transport(AsyncExitStack):
         try:
             while True:
                 data = await self._reader.readuntil(self._separator)
-                # While this event has not been received, we assume the connection is not necessarily healthy.
+                # While no data has been received, we assume the connection is not necessarily healthy.
                 # It is possible to be connected and not be able to communicated with the device.
                 # We assume the connection to be healthy when we receive responses.
                 # As long as it is unhealthy, connection attempts will increase the backoff.

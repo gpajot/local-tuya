@@ -42,6 +42,7 @@ class MQTTClient(Protocol):
     async def __aenter__(self):
         self._closed = False
         self._connect_task.create()
+        await self._connected.wait()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
