@@ -13,9 +13,6 @@ class TuyaConnectionClosed(Event):
     error: Exception | None
 
 
-class TuyaConnectionReset(Event): ...
-
-
 class TuyaDataSent(bytes, Event): ...
 
 

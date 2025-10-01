@@ -11,10 +11,8 @@ from local_tuya.events import EventNotifier
 from local_tuya.tuya.events import (
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
-    TuyaConnectionReset,
     TuyaDataReceived,
     TuyaDataSent,
-    TuyaResponseReceived,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,7 +38,6 @@ class TuyaStream(RobustStream):
             backoff=backoff.wait,
             timeout=timeout,
         )
-        event_notifier.register(TuyaConnectionReset, self._reconnect)
         self._notifier = event_notifier
         self._first_connect = True
 
@@ -56,7 +53,7 @@ class TuyaStream(RobustStream):
         await super()._connect()
         await self._notifier.emit(TuyaConnectionEstablished())
 
-    def _reconnect(self, _: TuyaConnectionReset) -> None:
+    def reconnect(self) -> None:
         if self._transport:
             self._transport.close()
 
@@ -70,40 +67,53 @@ class Transport(AsyncExitStack):
         separator: bytes,
         backoff: SequenceBackoff,
         timeout: float,
+        keepalive: float,
         event_notifier: EventNotifier,
     ):
         super().__init__()
         self._stream = TuyaStream(name, address, port, backoff, timeout, event_notifier)
         event_notifier.register(TuyaDataSent, self._write)
-        event_notifier.register(TuyaResponseReceived, self._connection_live)
+        event_notifier.register(
+            TuyaConnectionEstablished,
+            lambda _: self._reconnect_task.create(),
+        )
+        event_notifier.register(
+            TuyaConnectionClosed,
+            lambda _: self._reconnect_task.cancel(),
+        )
         self._name = name
         self._backoff = backoff
         self._separator = separator
+        self._keepalive = keepalive
         self._notifier = event_notifier
         self._reader: asyncio.StreamReader | None = None
 
         self._receive_task = BackgroundTask(self._receive)
+        self._reconnect_task = BackgroundTask(self._reconnect)
 
     async def __aenter__(self) -> Self:
         await self.enter_async_context(self._stream)
         self.enter_context(self._receive_task)
         return self
 
-    def _connection_live(self, _: TuyaResponseReceived) -> None:
-        # While this event has not been received, we assume the connection is not necessarily healthy.
-        # It is possible to be connected and not be able to communicated with the device.
-        # We assume the connection to be healthy when we receive responses.
-        # As long as it is unhealthy, connection attempts will increase the backoff.
-        self._backoff.reset()
-
     async def _receive(self) -> None:
         self._reader = self._stream.reader
         try:
             while True:
                 data = await self._reader.readuntil(self._separator)
+                # While this event has not been received, we assume the connection is not necessarily healthy.
+                # It is possible to be connected and not be able to communicated with the device.
+                # We assume the connection to be healthy when we receive responses.
+                # As long as it is unhealthy, connection attempts will increase the backoff.
+                self._backoff.reset()
+                self._reconnect_task.create()
                 await self._notifier.emit(TuyaDataReceived(data))
         finally:
             self._reader = None
 
     async def _write(self, data: TuyaDataSent) -> None:
         await self._stream.write(data)
+
+    async def _reconnect(self) -> None:
+        await asyncio.sleep(self._keepalive)
+        self._stream.reconnect()
