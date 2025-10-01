@@ -9,7 +9,6 @@ from local_tuya.tuya.events import (
     TuyaCommandSent,
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
-    TuyaConnectionReset,
 )
 from local_tuya.tuya.message import HeartbeatCommand
 
@@ -23,7 +22,6 @@ class Heartbeat(PeriodicTask):
         event_notifier.register(TuyaConnectionEstablished, lambda _: self.create())
         self._name = name
         self._notifier = event_notifier
-        self._missed = False
 
     def __enter__(self) -> Self:
         """Don't start automatically, only when connection is established."""
@@ -32,14 +30,5 @@ class Heartbeat(PeriodicTask):
     async def _heartbeat(self) -> None:
         try:
             await self._notifier.emit(TuyaCommandSent(HeartbeatCommand()))
-            self._missed = False
         except CommandTimeoutError:
-            if self._missed:
-                logger.warning(
-                    "%s: second timeout waiting for heartbeat response, reconnecting",
-                    self._name,
-                )
-                await self._notifier.emit(TuyaConnectionReset())
-            else:
-                logger.info("%s: timeout waiting for heartbeat response", self._name)
-                self._missed = True
+            logger.debug("%s: timeout waiting for heartbeat response", self._name)

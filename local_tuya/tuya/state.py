@@ -46,7 +46,7 @@ class State(PeriodicTask):
         try:
             await self._notifier.emit(TuyaCommandSent(StateCommand()))
         except CommandTimeoutError:
-            logger.warning("%s: timeout waiting for state response", self._name)
+            logger.debug("%s: timeout waiting for state response", self._name)
 
     async def _update(self, event: TuyaResponseReceived) -> None:
         if event.response.error:

@@ -42,6 +42,7 @@ class TuyaPackage(Package):
             separator=message_handler.SUFFIX.to_bytes(length=4, byteorder="big"),
             backoff=self._cfg.connection_backoff,
             timeout=self._cfg.timeout,
+            keepalive=self._cfg.heartbeat_interval * 2,
             event_notifier=notifier,
         ) as transport:
             yield transport
