@@ -79,18 +79,18 @@ async def test_publish_connected(connected_client, mock_client):
 
 
 async def test_publish_connecting(client, mock_client, aenter_future):
+    client._closed = False
+    publish_task = asyncio.create_task(client._publish("test-topic", "{}"))
+    await asyncio.sleep(0.001)  # context switch.
+    assert mock_client.publish.call_args_list == []
+    aenter_future.set_result(None)
     async with client:
-        publish_task = asyncio.create_task(client._publish("test-topic", "{}"))
-        await asyncio.sleep(0.001)  # context switch.
-        assert mock_client.publish.call_args_list == []
-        aenter_future.set_result(None)
-        await asyncio.sleep(0.001)  # context switch.
         assert mock_client.publish.call_args_list == [
             call("local-tuya/status/driver", b"online", retain=True),
             call("test-topic", "{}", retain=False),
         ]
-        # Cleanup.
-        await publish_task
+    # Cleanup.
+    await publish_task
 
 
 async def test_receive(mocker, connected_client, mock_client):
