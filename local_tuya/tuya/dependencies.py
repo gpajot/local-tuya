@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Iterator
+from typing import Iterator
 
 from imbue import Package, auto_context
 
@@ -28,13 +28,13 @@ class TuyaPackage(Package):
     def message_handler(self) -> MessageHandler:
         return get_handler(self._cfg)
 
-    @auto_context(eager=True)
-    async def transport(
+    @auto_context
+    def transport(
         self,
         notifier: EventNotifier,
         message_handler: MessageHandler,
-    ) -> AsyncIterator[Transport]:
-        async with Transport(
+    ) -> Transport:
+        return Transport(
             name=self._name,
             address=self._cfg.address,
             port=self._cfg.port,
@@ -43,8 +43,7 @@ class TuyaPackage(Package):
             keepalive=self._cfg.heartbeat_interval * 2,
             message_handler=message_handler,
             event_notifier=notifier,
-        ) as transport:
-            yield transport
+        )
 
     @auto_context(eager=True)
     def heartbeat(self, notifier: EventNotifier) -> Iterator[Heartbeat]:
