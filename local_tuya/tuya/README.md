@@ -20,16 +20,11 @@ flowchart LR
     P --> cs
     ST --> cs
     H --> cs
-    cs --> S
-    S[[Sender]]
-    ds([TuyaDataSent])
-    S --> ds
-    ds --> T
+    cs --> T
     T[[Transport]]
     rr([TuyaResponseReceived])
     T --> rr
     rr --> ST
-    rr --> S
     su([TuyaStateUpdated])
     ST --> su
 ```

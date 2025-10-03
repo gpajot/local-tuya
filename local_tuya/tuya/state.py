@@ -3,7 +3,6 @@ from typing import Self
 
 from concurrent_tasks import PeriodicTask
 
-from local_tuya.errors import CommandTimeoutError
 from local_tuya.events import EventNotifier
 from local_tuya.protocol import Values
 from local_tuya.tuya.events import (
@@ -42,11 +41,7 @@ class State(PeriodicTask):
         return self
 
     async def _refresh(self) -> None:
-        logger.debug("%s: refreshing device state", self._name)
-        try:
-            await self._notifier.emit(TuyaCommandSent(StateCommand()))
-        except CommandTimeoutError:
-            logger.debug("%s: timeout waiting for state response", self._name)
+        await self._notifier.emit(TuyaCommandSent(StateCommand()))
 
     async def _update(self, event: TuyaResponseReceived) -> None:
         if event.response.error:

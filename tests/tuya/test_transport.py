@@ -4,11 +4,31 @@ import pytest
 
 from local_tuya.backoff import SequenceBackoff
 from local_tuya.tuya.events import (
-    TuyaDataSent,
+    TuyaCommandSent,
     TuyaResponseReceived,
 )
-from local_tuya.tuya.message import MessageHandler, UpdateCommand, UpdateResponse
-from local_tuya.tuya.transport import Transport, TuyaStream
+from local_tuya.tuya.message import (
+    HeartbeatCommand,
+    MessageHandler,
+    StateCommand,
+    UpdateCommand,
+    UpdateResponse,
+)
+from local_tuya.tuya.transport import (
+    SequenceNumberGetter,
+    Transport,
+    TuyaStream,
+)
+
+
+def test_sequence_number():
+    seq = SequenceNumberGetter()
+    with seq:
+        assert seq(StateCommand()) == 1
+        assert seq(HeartbeatCommand()) == 0
+        assert seq(UpdateCommand({})) == 2
+    with seq:
+        assert seq(StateCommand()) == 1
 
 
 @pytest.fixture
@@ -49,10 +69,13 @@ async def transport(backoff, notifier, stream, msg_handler):
     )
 
 
-async def test_write(notifier, transport, stream):
+async def test_write(notifier, transport, stream, msg_handler):
+    msg_handler.pack.return_value = b"\x00"
+    cmd = HeartbeatCommand()
     async with transport:
-        await notifier.emit(TuyaDataSent(b"\x00"))
+        await notifier.emit(TuyaCommandSent(cmd))
     stream.write.assert_called_once_with(b"\x00")
+    msg_handler.pack.assert_called_once_with(0, cmd)
 
 
 async def test_receive(notifier, transport, reader, assert_event_emitted, msg_handler):
