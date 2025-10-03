@@ -1,6 +1,9 @@
 import inspect
+import logging
 from collections import defaultdict
 from typing import Any, Awaitable, Callable, DefaultDict, cast
+
+logger = logging.getLogger(__name__)
 
 
 class Event:
@@ -25,7 +28,12 @@ class EventNotifier:
 
     async def emit(self, event: Event) -> None:
         for listener in self._listeners[type(event)]:
-            await listener(event)
+            try:
+                await listener(event)
+            except Exception:
+                logger.warning(
+                    "error processing event %r for listener %s", event, listener
+                )
 
 
 def _make_async[**P](func: Callable[P, Any]) -> Callable[P, Awaitable[None]]:

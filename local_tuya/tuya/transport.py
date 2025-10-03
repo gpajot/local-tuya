@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from contextlib import AsyncExitStack
+from contextlib import AbstractContextManager, AsyncExitStack
 from functools import partial
 from typing import Self
 
@@ -9,12 +9,12 @@ from concurrent_tasks import BackgroundTask, RobustStream
 from local_tuya.backoff import SequenceBackoff
 from local_tuya.events import EventNotifier
 from local_tuya.tuya.events import (
+    TuyaCommandSent,
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
-    TuyaDataSent,
     TuyaResponseReceived,
 )
-from local_tuya.tuya.message import MessageHandler
+from local_tuya.tuya.message import Command, HeartbeatCommand, MessageHandler
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,24 @@ class TuyaStream(RobustStream):
             self._transport.close()
 
 
+class SequenceNumberGetter(AbstractContextManager):
+    def __init__(self):
+        self._num = 0
+
+    def __call__(self, command: Command) -> int:
+        if isinstance(command, HeartbeatCommand):
+            # Devices return 0 whatever is sent.
+            return 0
+        if self._num == 1000:
+            self._num = 1
+        else:
+            self._num += 1
+        return self._num
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._num = 0
+
+
 class Transport(AsyncExitStack):
     def __init__(
         self,
@@ -73,7 +91,7 @@ class Transport(AsyncExitStack):
     ):
         super().__init__()
         self._stream = TuyaStream(name, address, port, backoff, timeout, event_notifier)
-        event_notifier.register(TuyaDataSent, self._write)
+        event_notifier.register(TuyaCommandSent, self._write)
         event_notifier.register(
             TuyaConnectionEstablished,
             lambda _: self._reconnect_task.create(),
@@ -87,6 +105,7 @@ class Transport(AsyncExitStack):
         self._keepalive = keepalive
         self._msg_handler = message_handler
         self._msg_errors = 0
+        self._get_seq_number = SequenceNumberGetter()
         self._notifier = event_notifier
         self._reader: asyncio.StreamReader | None = None
 
@@ -94,6 +113,7 @@ class Transport(AsyncExitStack):
         self._reconnect_task = BackgroundTask(self._reconnect)
 
     async def __aenter__(self) -> Self:
+        self.enter_context(self._get_seq_number)
         await self.enter_async_context(self._stream)
         self.enter_context(self._receive_task)
         return self
@@ -141,7 +161,15 @@ class Transport(AsyncExitStack):
         finally:
             self._reader = None
 
-    async def _write(self, data: TuyaDataSent) -> None:
+    async def _write(self, event: TuyaCommandSent) -> None:
+        sequence_number = self._get_seq_number(event.command)
+        logger.debug(
+            "%s: sending message %i %s",
+            self._name,
+            sequence_number,
+            event.command.__class__.__name__,
+        )
+        data = self._msg_handler.pack(sequence_number, event.command)
         await self._stream.write(data)
 
     async def _reconnect(self) -> None:

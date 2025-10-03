@@ -10,7 +10,6 @@ from local_tuya.tuya.message import (
     get_handler,
 )
 from local_tuya.tuya.protocol import TuyaProtocol
-from local_tuya.tuya.sender import Sender
 from local_tuya.tuya.state import State
 from local_tuya.tuya.transport import Transport
 
@@ -48,23 +47,8 @@ class TuyaPackage(Package):
             yield transport
 
     @auto_context(eager=True)
-    def sender(
-        self,
-        notifier: EventNotifier,
-        msg_handler: MessageHandler,
-    ) -> Iterator[Sender]:
-        with Sender(
-            name=self._name,
-            message_handler=msg_handler,
-            event_notifier=notifier,
-            timeout=self._cfg.timeout,
-        ) as sender:
-            yield sender
-
-    @auto_context(eager=True)
     def heartbeat(self, notifier: EventNotifier) -> Iterator[Heartbeat]:
         with Heartbeat(
-            name=self._name,
             interval=self._cfg.heartbeat_interval,
             event_notifier=notifier,
         ) as heartbeat:

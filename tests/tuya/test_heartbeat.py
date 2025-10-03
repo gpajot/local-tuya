@@ -13,7 +13,7 @@ from local_tuya.tuya.message import HeartbeatCommand
 
 @pytest.fixture
 def heartbeat(notifier):
-    return Heartbeat("test", 0.01, notifier)
+    return Heartbeat(0.01, notifier)
 
 
 async def test_heartbeat(heartbeat, notifier, notifier_spy, assert_event_emitted):
