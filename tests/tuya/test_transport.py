@@ -4,9 +4,10 @@ import pytest
 
 from local_tuya.backoff import SequenceBackoff
 from local_tuya.tuya.events import (
-    TuyaDataReceived,
     TuyaDataSent,
+    TuyaResponseReceived,
 )
+from local_tuya.tuya.message import MessageHandler, UpdateCommand, UpdateResponse
 from local_tuya.tuya.transport import Transport, TuyaStream
 
 
@@ -30,15 +31,20 @@ def stream(mocker, reader):
 
 
 @pytest.fixture
-async def transport(backoff, notifier, stream):
+def msg_handler(mocker):
+    return mocker.Mock(spec=MessageHandler)
+
+
+@pytest.fixture
+async def transport(backoff, notifier, stream, msg_handler):
     return Transport(
         name="test",
         address="address",
         port=6666,
-        separator=b"z",
         backoff=backoff,
         timeout=5,
         keepalive=5,
+        message_handler=msg_handler,
         event_notifier=notifier,
     )
 
@@ -49,7 +55,9 @@ async def test_write(notifier, transport, stream):
     stream.write.assert_called_once_with(b"\x00")
 
 
-async def test_receive(notifier, transport, reader, assert_event_emitted):
+async def test_receive(notifier, transport, reader, assert_event_emitted, msg_handler):
+    msg_handler.separator = b"z"
+    msg_handler.unpack.return_value = (1, UpdateResponse(), UpdateCommand)
     returned = False
 
     async def _read(_):
@@ -63,4 +71,5 @@ async def test_receive(notifier, transport, reader, assert_event_emitted):
     reader.readuntil.side_effect = _read
     async with transport:
         await asyncio.sleep(0)  # context switch.
-    assert_event_emitted(TuyaDataReceived(b"\x00z"), 1)
+    msg_handler.unpack.assert_called_once_with(b"\x00z")
+    assert_event_emitted(TuyaResponseReceived(1, UpdateResponse(), UpdateCommand), 1)

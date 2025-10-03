@@ -11,9 +11,10 @@ from local_tuya.events import EventNotifier
 from local_tuya.tuya.events import (
     TuyaConnectionClosed,
     TuyaConnectionEstablished,
-    TuyaDataReceived,
     TuyaDataSent,
+    TuyaResponseReceived,
 )
+from local_tuya.tuya.message import MessageHandler
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +65,10 @@ class Transport(AsyncExitStack):
         name: str,
         address: str,
         port: int,
-        separator: bytes,
         backoff: SequenceBackoff,
         timeout: float,
         keepalive: float,
+        message_handler: MessageHandler,
         event_notifier: EventNotifier,
     ):
         super().__init__()
@@ -83,8 +84,9 @@ class Transport(AsyncExitStack):
         )
         self._name = name
         self._backoff = backoff
-        self._separator = separator
         self._keepalive = keepalive
+        self._msg_handler = message_handler
+        self._msg_errors = 0
         self._notifier = event_notifier
         self._reader: asyncio.StreamReader | None = None
 
@@ -100,14 +102,42 @@ class Transport(AsyncExitStack):
         self._reader = self._stream.reader
         try:
             while True:
-                data = await self._reader.readuntil(self._separator)
+                data = await self._reader.readuntil(self._msg_handler.separator)
                 # While no data has been received, we assume the connection is not necessarily healthy.
                 # It is possible to be connected and not be able to communicated with the device.
                 # We assume the connection to be healthy when we receive responses.
                 # As long as it is unhealthy, connection attempts will increase the backoff.
                 self._backoff.reset()
                 self._reconnect_task.create()
-                await self._notifier.emit(TuyaDataReceived(data))
+                try:
+                    (
+                        sequence_number,
+                        response,
+                        command_class,
+                    ) = self._msg_handler.unpack(data)
+                except Exception:
+                    logger.warning("error processing message", exc_info=True)
+                    # Allow 2 errors then reconnect on the 3rd.
+                    if self._msg_errors > 2:
+                        self._stream.reconnect()
+                        self._msg_errors = 0
+                    else:
+                        self._msg_errors += 1
+                    continue
+                self._msg_errors = 0
+                logger.debug(
+                    "%s: received message %i %s",
+                    self._name,
+                    sequence_number,
+                    response.__class__.__name__,
+                )
+                await self._notifier.emit(
+                    TuyaResponseReceived(
+                        sequence_number,
+                        response,
+                        command_class,
+                    )
+                )
         finally:
             self._reader = None
 

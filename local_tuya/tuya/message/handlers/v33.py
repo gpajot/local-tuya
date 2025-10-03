@@ -61,25 +61,20 @@ class V33MessageHandler(MessageHandler):
         self._cipher = AESCipher(config.key)
         self._version_header = config.version + self.VERSION_HEADER
 
+    @property
+    def separator(self) -> bytes:
+        return self.SUFFIX.to_bytes(length=4, byteorder="big")
+
     @classmethod
-    def from_config(cls, config: TuyaConfig) -> Self:
+    def from_config(cls, config: TuyaConfig) -> Self | None:
         if config.version is TuyaVersion.v33:
             return cls(config)
+        return None
 
     def pack(self, sequence_number: int, command: Command) -> bytes:
         if type(command) not in self.COMMANDS:
             raise LocalTuyaError(f"unknown command {command}")
         payload = command.payload or {}
-        # TODO: check if needed.
-        # payload.update({
-        #     # "gwId": self._cfg.id,
-        #     # "devId": self._cfg.id,
-        # })
-        # if not isinstance(command, HeartBeatCommand):
-        #     payload.update({
-        #         # "uid": self._cfg.id,
-        #         "t": int(time.time()),
-        #     })
         encrypted = self._cipher.encrypt(
             json.dumps(payload, separators=(",", ":")).encode()
         )
@@ -105,81 +100,69 @@ class V33MessageHandler(MessageHandler):
         )
         return data
 
-    def unpack(
-        self, data: bytes
-    ) -> tuple[int, Response | None, type[Command] | None, bytes]:
+    def unpack(self, data: bytes) -> tuple[int, Response, type[Command] | None]:
         header_length = struct.calcsize(self.HEADER_FMT)
 
         # Header.
         if len(data) < header_length:
-            # Wait for more data.
-            return 0, None, None, data
+            raise DecodeResponseError(f"not enough data: {data!r}")
         header = data[:header_length]
         prefix, sequence_number, cmd, payload_length = struct.unpack(
             self.HEADER_FMT, header
         )
         if prefix != self.PREFIX:
-            raise ResponseError(f"incorrect prefix: 0x{prefix:08x}")
-
-        # Payload.
-        if len(data) < header_length + payload_length:
-            # Wait for more data.
-            return 0, None, None, data
-        payload = data[header_length : header_length + payload_length]
-
+            raise DecodeResponseError(f"incorrect prefix: 0x{prefix:08x}")
         if cmd not in self.RESPONSES:
-            logger.warning("unknown response type %i, ignoring", cmd)
-            return 0, None, None, data[header_length + payload_length :]
-
+            raise DecodeResponseError(f"unknown response type 0x{cmd:08x}")
         response_factory = self.RESPONSES[cmd]
         command_class = self.COMMAND_CLASSES.get(cmd)
 
-        try:
-            # Get the return code.
-            return_code_length = struct.calcsize(self.RETURN_CODE_FMT)
-            (return_code,) = struct.unpack(
-                self.RETURN_CODE_FMT, payload[:return_code_length]
-            )
+        # Check length.
+        return_code_length = struct.calcsize(self.RETURN_CODE_FMT)
+        end_length = struct.calcsize(self.END_FMT)
+        if payload_length < return_code_length + end_length:
+            raise DecodeResponseError(f"payload not long enough: {data!r}")
+        elif len(data) < header_length + payload_length:
+            raise DecodeResponseError(f"not enough data: {data!r}")
+        elif len(data) > header_length + payload_length:
+            raise DecodeResponseError(f"too much data: {data!r}")
 
-            # Check the suffix, ignore the hash.
-            end_length = struct.calcsize(self.END_FMT)
-            _, suffix = struct.unpack(self.END_FMT, payload[-end_length:])
-            if suffix != self.SUFFIX:
-                raise ResponseError(f"incorrect suffix: 0x{suffix:08x}")
+        # Check the suffix, ignore the hash.
+        _, suffix = struct.unpack(self.END_FMT, data[-end_length:])
+        if suffix != self.SUFFIX:
+            raise DecodeResponseError(f"incorrect suffix: 0x{suffix:08x}")
 
-            # Parse payload.
-            payload_content = payload[return_code_length:-end_length]
-            if payload_content.startswith(self._cfg.version):
-                payload_content = payload_content[len(self._version_header) :]
-            parsed_payload: Payload | None = None
-            error: ResponseError | None = None
-            if return_code:
-                # Use the payload content as the error description.
-                error = ResponseError(payload_content.decode())
-            elif payload_content:
-                try:
-                    decrypted = self._cipher.decrypt(payload_content)
-                    try:
-                        parsed_payload = json.loads(decrypted)
-                    except Exception as e:
-                        error = DecodeResponseError(
-                            f"could not load {decrypted!r} as json", e
-                        )
-                except Exception as e:
-                    error = DecodeResponseError(
-                        f"could not decrypt {payload_content!r}", e
-                    )
+        # Get the return code.
+        (return_code,) = struct.unpack(
+            self.RETURN_CODE_FMT,
+            data[header_length : header_length + return_code_length],
+        )
 
-            return (
-                sequence_number,
-                response_factory(parsed_payload, error),
-                command_class,
-                data[header_length + payload_length :],
-            )
-        except Exception as e:
-            return (
-                sequence_number,
-                response_factory(None, ResponseError("error handling response", e)),
-                command_class,
-                data[header_length + payload_length :],
-            )
+        payload_content = data[header_length + return_code_length : -end_length]
+        if payload_content.startswith(self._cfg.version):
+            payload_content = payload_content[len(self._version_header) :]
+
+        # Parse payload.
+        parsed_payload: Payload | None = None
+        error: ResponseError | None = None
+        if return_code:
+            error = ResponseError(f"error from device: {payload_content!r}")
+        elif payload_content:
+            try:
+                decrypted = self._cipher.decrypt(payload_content)
+            except Exception as e:
+                raise DecodeResponseError(
+                    f"could not decrypt {payload_content!r}"
+                ) from e
+            try:
+                parsed_payload = json.loads(decrypted)
+            except Exception as e:
+                raise DecodeResponseError(
+                    f"could not load {decrypted!r} as json"
+                ) from e
+
+        return (
+            sequence_number,
+            response_factory(parsed_payload, error),
+            command_class,
+        )
