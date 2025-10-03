@@ -26,12 +26,8 @@ flowchart LR
     S --> ds
     ds --> T
     T[[Transport]]
-    dr([TuyaDataReceived])
-    T --> dr
-    dr --> R
-    R[[Receiver]]
     rr([TuyaResponseReceived])
-    R --> rr
+    T --> rr
     rr --> ST
     rr --> S
     su([TuyaStateUpdated])

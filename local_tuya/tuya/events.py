@@ -16,9 +16,6 @@ class TuyaConnectionClosed(Event):
 class TuyaDataSent(bytes, Event): ...
 
 
-class TuyaDataReceived(bytes, Event): ...
-
-
 @dataclass
 class TuyaCommandSent(Event):
     command: Command

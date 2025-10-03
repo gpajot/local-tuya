@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-from local_tuya.errors import DecodeResponseError, ResponseError
+from local_tuya.errors import ResponseError
 from local_tuya.protocol import Value, Values
 
 type Payload = dict[str, Value | Values]
@@ -51,7 +51,7 @@ class StatusResponse:
         if payload and "dps" in payload and isinstance(payload["dps"], dict):
             self.values = payload["dps"]
         if not self.values and not self.error:
-            self.error = DecodeResponseError("no dps in response")
+            self.error = ResponseError("no dps in response")
 
 
 class StateCommand(EmptyCommand): ...

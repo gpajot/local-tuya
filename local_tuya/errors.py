@@ -7,13 +7,8 @@ class CommandTimeoutError(LocalTuyaError):
 
 
 class ResponseError(LocalTuyaError):
-    """Generic error in responses"""
-
-    def __init__(self, message: str = "", cause: Exception | None = None):
-        super().__init__(message)
-        if cause:
-            self.__cause__ = cause
+    """Error from Tuya device."""
 
 
-class DecodeResponseError(ResponseError):
+class DecodeResponseError(LocalTuyaError):
     """Error parsing Tuya response."""
