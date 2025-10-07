@@ -1,15 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Self
+from typing import Awaitable, Callable, Self
 
 from local_tuya.tuya.config import TuyaConfig
 from local_tuya.tuya.message.messages import Command, Response
 
 
 class MessageHandler(ABC):
-    @property
-    @abstractmethod
-    def separator(self) -> bytes: ...
-
     @classmethod
     @abstractmethod
     def from_config(cls, config: TuyaConfig) -> Self | None:
@@ -20,5 +16,8 @@ class MessageHandler(ABC):
         """Pack a message into bytes."""
 
     @abstractmethod
-    def unpack(self, data: bytes) -> tuple[int, Response, type[Command] | None]:
+    async def unpack(
+        self,
+        read: Callable[[int], Awaitable[bytes]],
+    ) -> tuple[int, Response, type[Command] | None]:
         """Extract message from the bytes received, also return unused remaining bytes."""

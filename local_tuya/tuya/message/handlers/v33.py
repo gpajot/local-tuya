@@ -2,7 +2,7 @@ import binascii
 import json
 import logging
 import struct
-from typing import Callable, ClassVar, Self
+from typing import Awaitable, Callable, ClassVar, Self
 
 from local_tuya.errors import DecodeResponseError, LocalTuyaError, ResponseError
 from local_tuya.tuya.config import TuyaConfig, TuyaVersion
@@ -100,16 +100,28 @@ class V33MessageHandler(MessageHandler):
         )
         return data
 
-    def unpack(self, data: bytes) -> tuple[int, Response, type[Command] | None]:
+    async def unpack(
+        self,
+        read: Callable[[int], Awaitable[bytes]],
+    ) -> tuple[int, Response, type[Command] | None]:
         header_length = struct.calcsize(self.HEADER_FMT)
+        header_data = await read(header_length)
+        if len(header_data) < header_length:
+            raise DecodeResponseError(f"not enough header data: {header_data!r}")
+        prefix, sequence_number, cmd, payload_length = struct.unpack(
+            self.HEADER_FMT, header_data
+        )
+        if prefix != self.PREFIX:
+            raise DecodeResponseError(f"incorrect prefix: 0x{prefix:08x}")
+        payload_data = await read(payload_length)
+        if len(payload_data) < payload_length:
+            raise DecodeResponseError(f"not enough payload data: {payload_data!r}")
+        return_code_length = struct.calcsize(self.RETURN_CODE_FMT)
+        end_length = struct.calcsize(self.END_FMT)
+        if payload_length < return_code_length + end_length:
+            raise DecodeResponseError(f"payload not long enough: {payload_data!r}")
 
         # Header.
-        if len(data) < header_length:
-            raise DecodeResponseError(f"not enough data: {data!r}")
-        header = data[:header_length]
-        prefix, sequence_number, cmd, payload_length = struct.unpack(
-            self.HEADER_FMT, header
-        )
         if prefix != self.PREFIX:
             raise DecodeResponseError(f"incorrect prefix: 0x{prefix:08x}")
         if cmd not in self.RESPONSES:
@@ -117,43 +129,31 @@ class V33MessageHandler(MessageHandler):
         response_factory = self.RESPONSES[cmd]
         command_class = self.COMMAND_CLASSES.get(cmd)
 
-        # Check length.
-        return_code_length = struct.calcsize(self.RETURN_CODE_FMT)
-        end_length = struct.calcsize(self.END_FMT)
-        if payload_length < return_code_length + end_length:
-            raise DecodeResponseError(f"payload not long enough: {data!r}")
-        elif len(data) < header_length + payload_length:
-            raise DecodeResponseError(f"not enough data: {data!r}")
-        elif len(data) > header_length + payload_length:
-            raise DecodeResponseError(f"too much data: {data!r}")
-
-        # Check the suffix, ignore the hash.
-        _, suffix = struct.unpack(self.END_FMT, data[-end_length:])
+        # Payload metadata.
+        (return_code,) = struct.unpack(
+            self.RETURN_CODE_FMT,
+            payload_data[:return_code_length],
+        )
+        _, suffix = struct.unpack(
+            self.END_FMT, payload_data[-end_length:]
+        )  # Ignore the hash.
         if suffix != self.SUFFIX:
             raise DecodeResponseError(f"incorrect suffix: 0x{suffix:08x}")
 
-        # Get the return code.
-        (return_code,) = struct.unpack(
-            self.RETURN_CODE_FMT,
-            data[header_length : header_length + return_code_length],
-        )
-
-        payload_content = data[header_length + return_code_length : -end_length]
-        if payload_content.startswith(self._cfg.version):
-            payload_content = payload_content[len(self._version_header) :]
+        payload = payload_data[return_code_length:-end_length]
+        if payload.startswith(self._cfg.version):
+            payload = payload[len(self._version_header) :]
 
         # Parse payload.
         parsed_payload: Payload | None = None
         error: ResponseError | None = None
         if return_code:
-            error = ResponseError(f"error from device: {payload_content!r}")
-        elif payload_content:
+            error = ResponseError(f"error from device: {payload!r}")
+        elif payload:
             try:
-                decrypted = self._cipher.decrypt(payload_content)
+                decrypted = self._cipher.decrypt(payload)
             except Exception as e:
-                raise DecodeResponseError(
-                    f"could not decrypt {payload_content!r}"
-                ) from e
+                raise DecodeResponseError(f"could not decrypt {payload!r}") from e
             try:
                 parsed_payload = json.loads(decrypted)
             except Exception as e:

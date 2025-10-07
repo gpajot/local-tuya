@@ -1,8 +1,8 @@
 import asyncio
 import logging
-from contextlib import AbstractContextManager, AsyncExitStack
+from contextlib import AbstractContextManager, AsyncExitStack, contextmanager
 from functools import partial
-from typing import Self
+from typing import Iterator, Self
 
 from concurrent_tasks import BackgroundTask, RobustStream
 
@@ -118,25 +118,38 @@ class Transport(AsyncExitStack):
         self.enter_context(self._receive_task)
         return self
 
-    async def _receive(self) -> None:
+    @contextmanager
+    def reader(self) -> Iterator[None]:
         self._reader = self._stream.reader
         try:
+            yield None
+        finally:
+            self._reader = None
+
+    async def _read(self, n: int) -> bytes:
+        assert self._reader
+        data = await self._reader.read(n)
+        # While no data has been received, we assume the connection is not necessarily healthy.
+        # It is possible to be connected and not be able to communicated with the device.
+        # We assume the connection to be healthy when we receive responses.
+        # As long as it is unhealthy, connection attempts will increase the backoff.
+        self._backoff.reset()
+        self._reconnect_task.create()
+        return data
+
+    async def _receive(self) -> None:
+        with self.reader():
             while True:
-                data = await self._reader.readuntil(self._msg_handler.separator)
-                # While no data has been received, we assume the connection is not necessarily healthy.
-                # It is possible to be connected and not be able to communicated with the device.
-                # We assume the connection to be healthy when we receive responses.
-                # As long as it is unhealthy, connection attempts will increase the backoff.
-                self._backoff.reset()
-                self._reconnect_task.create()
                 try:
                     (
                         sequence_number,
                         response,
                         command_class,
-                    ) = self._msg_handler.unpack(data)
+                    ) = await self._msg_handler.unpack(self._read)
                 except Exception:
-                    logger.warning("error processing message", exc_info=True)
+                    logger.warning(
+                        "%s: error processing message", self._name, exc_info=True
+                    )
                     # Allow 2 errors then reconnect on the 3rd.
                     if self._msg_errors > 2:
                         self._stream.reconnect()
@@ -158,8 +171,6 @@ class Transport(AsyncExitStack):
                         command_class,
                     )
                 )
-        finally:
-            self._reader = None
 
     async def _write(self, event: TuyaCommandSent) -> None:
         sequence_number = self._get_seq_number(event.command)
