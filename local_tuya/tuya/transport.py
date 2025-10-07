@@ -129,6 +129,9 @@ class Transport(AsyncExitStack):
     async def _read(self, n: int) -> bytes:
         assert self._reader
         data = await self._reader.read(n)
+        if not data:
+            # This means we have been (re)connected.
+            raise ConnectionResetError("empty data received")
         # While no data has been received, we assume the connection is not necessarily healthy.
         # It is possible to be connected and not be able to communicated with the device.
         # We assume the connection to be healthy when we receive responses.
@@ -146,6 +149,9 @@ class Transport(AsyncExitStack):
                         response,
                         command_class,
                     ) = await self._msg_handler.unpack(self._read)
+                except ConnectionResetError:
+                    self._msg_errors = 0
+                    continue
                 except Exception:
                     logger.warning(
                         "%s: error processing message", self._name, exc_info=True
