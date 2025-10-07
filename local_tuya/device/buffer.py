@@ -143,7 +143,9 @@ class UpdateBuffer:
                     if i == 0:
                         logger.debug("%s: update confirmed", self._name)
                     else:
-                        logger.info("%s: update confirmed after try %i", self._name, i)
+                        logger.debug(
+                            "%s: update confirmed after retry %i", self._name, i
+                        )
                     return
                 if i == self._retries:
                     logger.error(
@@ -152,8 +154,8 @@ class UpdateBuffer:
                         i,
                     )
                     return
-                (logger.debug if i == 0 else logger.warning)(
-                    "%s: update not confirmed, attempting new update, try %i...",
+                logger.debug(
+                    "%s: update not confirmed, attempting new update, retry %i...",
                     self._name,
                     i + 1,
                 )

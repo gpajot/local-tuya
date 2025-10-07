@@ -79,20 +79,23 @@ async def test_write(notifier, transport, stream, msg_handler):
 
 
 async def test_receive(notifier, transport, reader, assert_event_emitted, msg_handler):
-    msg_handler.separator = b"z"
-    msg_handler.unpack.return_value = (1, UpdateResponse(), UpdateCommand)
+    async def _unpack(read):
+        assert await read(1) == b"\x01"
+        return 1, UpdateResponse(), UpdateCommand
+
+    msg_handler.unpack.side_effect = _unpack
     returned = False
 
-    async def _read(_):
+    async def _read(n):
+        assert n == 1
         nonlocal returned
         if not returned:
             returned = True
-            return b"\x00z"
+            return b"\x01"
         await asyncio.sleep(1)
-        return b"\x00z"
+        return b"\x02"
 
-    reader.readuntil.side_effect = _read
+    reader.read.side_effect = _read
     async with transport:
         await asyncio.sleep(0)  # context switch.
-    msg_handler.unpack.assert_called_once_with(b"\x00z")
     assert_event_emitted(TuyaResponseReceived(1, UpdateResponse(), UpdateCommand), 1)
