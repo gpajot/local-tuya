@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from local_tuya.backoff import SequenceBackoff
 
@@ -20,4 +20,6 @@ class MQTTConfig(BaseModel):
     password: str | None = None
     timeout: float = 5
     keepalive: int = 60
-    backoff: SequenceBackoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
+    backoff: SequenceBackoff = Field(
+        default_factory=lambda: SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
+    )
