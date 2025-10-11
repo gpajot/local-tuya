@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from local_tuya.backoff import SequenceBackoff
 from local_tuya.tuya import TuyaConfig
@@ -13,4 +13,6 @@ class DeviceConfig(BaseModel):
     # Determines how often to retry updates until the state matches.
     # `retries` can be set to 0 to disable retries.
     retries: int = 5
-    retry_backoff: SequenceBackoff = SequenceBackoff(5, 10, 30, 60)
+    retry_backoff: SequenceBackoff = Field(
+        default_factory=lambda: SequenceBackoff(5, 10, 30, 60)
+    )

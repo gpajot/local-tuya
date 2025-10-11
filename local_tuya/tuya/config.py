@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from local_tuya.backoff import SequenceBackoff
 
@@ -18,7 +18,9 @@ class TuyaConfig(BaseModel):
     port: int = 6668
     version: TuyaVersion = TuyaVersion.v33
     # How long to wait between reconnection attempts.
-    connection_backoff: SequenceBackoff = SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
+    connection_backoff: SequenceBackoff = Field(
+        default_factory=lambda: SequenceBackoff(0, 1, 5, 10, 30, 60, 300)
+    )
     # Seconds to wait until command can be confirmed.
     # This excludes time waiting for the connection to be established.
     timeout: float = 5
