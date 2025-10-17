@@ -1,6 +1,6 @@
-FROM python:3.13-slim AS python-builder-base
+FROM python:3.14-slim AS python-builder-base
 
-COPY --from=ghcr.io/astral-sh/uv:0.8 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv version --short > ./version.txt
 
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 COPY --from=python-builder-base /app/.venv ./.venv
