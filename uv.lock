@@ -128,7 +128,7 @@ requires-dist = [
     { name = "imbue", specifier = "==2.1.3" },
     { name = "pycryptodomex", specifier = "==3.23.0" },
     { name = "uvloop", specifier = "==0.22.1" },
-    { name = "zenconfig", extras = ["pydantic", "yaml"], specifier = "==2.1.1" },
+    { name = "zenconfig", extras = ["pydantic", "yaml"], specifier = "==2.2.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -462,14 +462,14 @@ wheels = [
 
 [[package]]
 name = "zenconfig"
-version = "2.1.1"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/b2/636fff4cd3a3c7417cbc2a8030e18c577b0741210a09f4c3c9cc4039c989/zenconfig-2.1.1.tar.gz", hash = "sha256:282a52a3e3ec0cf7030485276fa3a3b12cdd4f186fda99a65fb6cdb64bd5511d", size = 9572, upload-time = "2024-04-01T15:44:17.609Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/bb/969caeead72816d4036597ef76dc0254010c170689ddd5a82dd24839d8ba/zenconfig-2.2.0.tar.gz", hash = "sha256:f5c8b7470c2288fe3c44af50b83552f659380479834247a670ea3b9fc95d888e", size = 7890, upload-time = "2025-10-17T07:49:25.122Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/a3/ce691c9177f1f035bc4f802df091f23989c128466299026b08c0a42f7c99/zenconfig-2.1.1-py3-none-any.whl", hash = "sha256:a3a8c63a6d0b6f5ac000f70c327c31a575542037aca8a473872dafb71e235125", size = 12741, upload-time = "2024-04-01T15:44:15.896Z" },
+    { url = "https://files.pythonhosted.org/packages/56/b9/1336db716ebb4b7964f3bc8344134f16b739e47c933c72dbe210b0469ed2/zenconfig-2.2.0-py3-none-any.whl", hash = "sha256:dffc90a4ad8a89654bed617383227ef59b7be0bc913e5254faa243df5eca0303", size = 13342, upload-time = "2025-10-17T07:49:23.721Z" },
 ]
 
 [package.optional-dependencies]

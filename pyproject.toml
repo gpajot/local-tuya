@@ -15,7 +15,7 @@ dependencies = [
     "imbue ==2.1.3",
     "pycryptodomex ==3.23.0",
     "uvloop ==0.22.1",
-    "zenconfig[pydantic,yaml] ==2.1.1",
+    "zenconfig[pydantic,yaml] ==2.2.0",
 ]
 license-files = ["LICENSE"]
 
