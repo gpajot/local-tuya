@@ -1,13 +1,17 @@
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field
-from zenconfig import ReadOnlyConfig
+from pydantic import Field
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    YamlConfigSettingsSource,
+)
 
 from local_tuya.contrib import FullDeviceConfig
 from local_tuya.mqtt import MQTTConfig
 
 
-class Config(BaseModel, ReadOnlyConfig):
+class Config(BaseSettings):
     mqtt: MQTTConfig
     devices: tuple[FullDeviceConfig, ...]
     logging: dict[str, Any] = Field(
@@ -33,4 +37,16 @@ class Config(BaseModel, ReadOnlyConfig):
             },
         }
     )
-    debug: bool = False
+
+    YAML_FILE: ClassVar[str] = ""
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        *_,
+        **__,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        if not cls.YAML_FILE:
+            raise ValueError("no config path provided")
+        return (YamlConfigSettingsSource(settings_cls, yaml_file=cls.YAML_FILE),)
