@@ -1,8 +1,9 @@
 import asyncio
 import logging
+from collections.abc import Iterator
 from contextlib import AbstractContextManager, AsyncExitStack, contextmanager
 from functools import partial
-from typing import Iterator, Self
+from typing import Self
 
 from concurrent_tasks import BackgroundTask, RobustStream
 

@@ -1,7 +1,7 @@
 import asyncio
 import logging.config
+from collections.abc import AsyncIterator
 from contextlib import AsyncExitStack, asynccontextmanager
-from typing import AsyncIterator
 
 from concurrent_tasks import BackgroundTask, LoopExceptionHandler
 from imbue import Container

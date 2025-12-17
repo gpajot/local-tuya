@@ -1,9 +1,10 @@
 import asyncio
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 from contextlib import AsyncExitStack
 from functools import partial
-from typing import ClassVar, Collection
+from typing import ClassVar
 
 from concurrent_tasks import TaskPool
 

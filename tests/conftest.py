@@ -36,9 +36,7 @@ def assert_event_emitted(notifier_spy):
     def _assert(expected_event, count):
         n = 0
         for call in notifier_spy.call_args_list:
-            if len(call[0]) == 1 and type(expected_event) is type(  # noqa: E721
-                call[0][0]
-            ):
+            if len(call[0]) == 1 and type(expected_event) is type(call[0][0]):
                 actual_event = call[0][0]
                 with contextlib.suppress(Exception):
                     _assert_equal(expected_event, actual_event)

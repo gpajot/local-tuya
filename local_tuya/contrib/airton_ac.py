@@ -1,5 +1,5 @@
+from collections.abc import Collection
 from enum import Enum
-from typing import Collection
 
 from local_tuya.device import (
     Constraint,
@@ -200,8 +200,10 @@ class AirtonACDevice(Device):
             for e in ACDataPoint
             if included_components is None
             or e.name in included_components
-            or e is ACDataPoint.swing_direction
-            and ACDataPoint.swing.name in included_components
+            or (
+                e is ACDataPoint.swing_direction
+                and ACDataPoint.swing.name in included_components
+            )
         }
 
     def _from_tuya_payload(self, tuya_payload: Values) -> Values:

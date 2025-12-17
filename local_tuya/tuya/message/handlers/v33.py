@@ -2,7 +2,8 @@ import binascii
 import json
 import logging
 import struct
-from typing import Awaitable, Callable, ClassVar, Self
+from collections.abc import Awaitable, Callable
+from typing import ClassVar, Self
 
 from local_tuya.errors import DecodeResponseError, LocalTuyaError, ResponseError
 from local_tuya.tuya.config import TuyaConfig, TuyaVersion
