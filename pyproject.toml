@@ -54,5 +54,5 @@ warn_untyped_fields = true
 build-backend = { module-name = "local_tuya", module-root = "" }
 
 [build-system]
-requires = ["uv_build>=0.9.3,<0.10"]
+requires = ["uv_build>=0.9.17,<0.10"]
 build-backend = "uv_build"

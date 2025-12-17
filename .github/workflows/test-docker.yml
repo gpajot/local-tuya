@@ -18,5 +18,5 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/arm64
-          outputs: type=local,dest=/tmp/image
+          load: true
+          tags: gpajot/local-tuya:test
