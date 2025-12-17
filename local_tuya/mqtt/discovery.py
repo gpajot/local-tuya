@@ -126,4 +126,4 @@ class DiscoveryMessage:
 
 
 def _get_value_template(component_property: str) -> str:
-    return "{{ value_json.%s }}" % component_property
+    return "{{ value_json.%s }}" % component_property  # noqa: UP031

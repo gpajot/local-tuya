@@ -1,7 +1,7 @@
 """Utilities to alter how device values are reported."""
 
 import time
-from typing import Callable
+from collections.abc import Callable
 
 type ValueProcessor[T] = Callable[[T], T]
 

@@ -25,9 +25,9 @@ class Options(BaseSettings):
     verbose: Annotated[bool, Field(description="Show all logs.")] = False
 
 
-options = Options()
+options = Options()  # ty: ignore[missing-argument]
 Config.YAML_FILE = options.config
-config = Config()
+config = Config()  # ty: ignore[missing-argument]
 logging.config.dictConfig(config.logging)
 if options.verbose:
     logging.getLogger().setLevel(logging.DEBUG)

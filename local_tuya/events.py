@@ -1,7 +1,8 @@
 import inspect
 import logging
 from collections import defaultdict
-from typing import Any, Awaitable, Callable, DefaultDict, cast
+from collections.abc import Awaitable, Callable
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ class Event:
 
 class EventNotifier:
     def __init__(self):
-        self._listeners: DefaultDict[
+        self._listeners: defaultdict[
             type[Event], list[Callable[[Event], Awaitable[None]]]
         ] = defaultdict(list)
 

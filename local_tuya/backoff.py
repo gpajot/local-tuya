@@ -31,7 +31,7 @@ class SequenceBackoff(AbstractContextManager):
             self.__index += 1
 
     def __repr__(self) -> str:
-        return f"SequenceBackoff({', '.join(map(str, self.__seq))})"
+        return f"SequenceBackoff({', '.join(str(e) for e in self.__seq)})"
 
     @classmethod
     def __get_pydantic_core_schema__(

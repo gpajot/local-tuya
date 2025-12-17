@@ -25,7 +25,7 @@ jobs:
         run: uv run --locked ruff format --check .
       - name: Run lint
         run: uv run --locked ruff check .
-      - name: Run mypy
-        run: uv run --locked mypy .
+      - name: Run type check
+        run: uv run --locked ty check
       - name: Run tests
         run: uv run --locked pytest -v

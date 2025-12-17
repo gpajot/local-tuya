@@ -2,8 +2,8 @@ import asyncio
 import contextlib
 import json
 import logging
+from collections.abc import AsyncIterator
 from time import time_ns
-from typing import Any, AsyncIterator
 
 import aiomqtt
 from concurrent_tasks import BackgroundTask
@@ -14,7 +14,7 @@ from local_tuya.mqtt.config import (
     get_status_topic,
 )
 from local_tuya.mqtt.discovery import DiscoveryMessage
-from local_tuya.protocol import DeviceDiscovery, Protocol, Values
+from local_tuya.protocol import DeviceDiscovery, Protocol, Value, Values
 
 logger = logging.getLogger(__name__)
 
@@ -109,10 +109,12 @@ class MQTTClient(Protocol):
         ):
             # Doesn't match the topic structure we want.
             return None
-        device_id = topic_parts[2]
+        device_id: str = topic_parts[2]
         component_property = topic_parts[3]
-        value: Any
-        if message.payload is None or isinstance(message.payload, (int, float)):
+        if message.payload is None:
+            return None
+        value: Value
+        if isinstance(message.payload, (int, float)):
             value = message.payload
         else:
             try:

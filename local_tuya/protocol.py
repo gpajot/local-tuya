@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator, Collection
 from dataclasses import dataclass
 from enum import Enum
-from typing import AsyncIterator, Collection, Self
+from typing import Self
 
 type Value = bool | int | float | str
 type Values = dict[str, Value]

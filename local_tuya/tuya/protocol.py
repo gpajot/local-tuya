@@ -1,5 +1,5 @@
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
-from typing import AsyncContextManager
 
 from local_tuya.events import EventNotifier
 from local_tuya.protocol import Values
@@ -19,5 +19,5 @@ class TuyaProtocol:
         """Update the device."""
         await self.event_notifier.emit(TuyaCommandSent(UpdateCommand(values)))
 
-    def initialize(self) -> AsyncContextManager:
+    def initialize(self) -> AbstractAsyncContextManager:
         return self.transport
