@@ -82,11 +82,11 @@ wheels = [
 
 [[package]]
 name = "imbue"
-version = "2.1.3"
+version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1c/09/a2523225207103b976fb9d38149dc5cff2fe7169cc7786624cd9718fded2/imbue-2.1.3.tar.gz", hash = "sha256:d9e61ab5988bad2cafdf58662f8bea5fdf439b002bf52e7edf9b423d73327eed", size = 12549, upload-time = "2025-09-07T20:16:22.659Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/44/a6fea49d3b66e73a7b254ea7b42e72ab254e7fd8851e1cb41c44d28fab2d/imbue-2.2.1.tar.gz", hash = "sha256:0e4fcaa16f5d849de344d2839b49dfc058a04f57ca7a03d7e6d3d12e81d24a7b", size = 13090, upload-time = "2025-12-25T14:44:59.139Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/ff/01731bf26700795d7024152908702aa187a7cff8141ad08bb3b7d254a3cb/imbue-2.1.3-py3-none-any.whl", hash = "sha256:96c5036707a282c226a42f32761b70fb3e7ac7ca4063c1f2f8a497cd0878eacb", size = 20832, upload-time = "2025-09-07T20:16:21.422Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/0a/dae537f00b0628967ff4ff11f679f2a07b3b563b4411e89468122ad5cd03/imbue-2.2.1-py3-none-any.whl", hash = "sha256:393b6eea29e08168dfdd66b81d5f97035e42af4e5c116a1d8435b56effa70a42", size = 21709, upload-time = "2025-12-25T14:44:57.786Z" },
 ]
 
 [[package]]
@@ -125,7 +125,7 @@ dev = [
 requires-dist = [
     { name = "aiomqtt", marker = "python_full_version < '4'", specifier = "==2.4.0" },
     { name = "concurrent-tasks", specifier = "==1.16.3" },
-    { name = "imbue", specifier = "==2.1.3" },
+    { name = "imbue", specifier = "==2.2.1" },
     { name = "pycryptodomex", specifier = "==3.23.0" },
     { name = "pydantic-settings", extras = ["yaml"], specifier = "==2.12.0" },
     { name = "uvloop", specifier = "==0.22.1" },
