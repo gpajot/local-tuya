@@ -48,5 +48,5 @@ unused-ignore-comment = "warn"
 error-on-warning = true
 
 [build-system]
-requires = ["uv_build>=0.9.17,<0.10"]
+requires = ["uv_build>=0.9.17,<0.11"]
 build-backend = "uv_build"
