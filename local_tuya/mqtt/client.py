@@ -30,6 +30,7 @@ class MQTTClient(Protocol):
             port=config.port,
             username=config.username,
             password=config.password,
+            identifier="local-tuya",
             timeout=config.timeout,
             keepalive=config.keepalive,
             will=aiomqtt.Will(self._status_topic, b"offline", retain=True),
