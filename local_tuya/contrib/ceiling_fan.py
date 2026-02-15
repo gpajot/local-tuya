@@ -1,5 +1,5 @@
 from collections.abc import Collection
-from enum import Enum
+from enum import StrEnum
 
 from local_tuya.device import (
     Constraint,
@@ -14,7 +14,7 @@ from local_tuya.protocol import (
 )
 
 
-class FanDataPoint(str, Enum):
+class FanDataPoint(StrEnum):
     power = "1"
     speed = "3"
     direction = "4"
@@ -22,7 +22,7 @@ class FanDataPoint(str, Enum):
     mode = "102"
 
 
-class FanSpeed(str, Enum):
+class FanSpeed(StrEnum):
     L1 = "1"
     L2 = "2"
     L3 = "3"
@@ -31,12 +31,12 @@ class FanSpeed(str, Enum):
     L6 = "6"
 
 
-class FanDirection(str, Enum):
+class FanDirection(StrEnum):
     forward = "forward"
     reverse = "reverse"
 
 
-class FanMode(str, Enum):
+class FanMode(StrEnum):
     normal = "normal"
     sleep = "sleep"
     nature = "nature"
