@@ -1,5 +1,5 @@
 from collections.abc import Collection
-from enum import Enum
+from enum import StrEnum
 
 from local_tuya.device import (
     Constraint,
@@ -20,7 +20,7 @@ from local_tuya.protocol import (
 )
 
 
-class ACDataPoint(str, Enum):
+class ACDataPoint(StrEnum):
     power = "1"
     set_point = "2"
     temperature = "3"
@@ -34,7 +34,7 @@ class ACDataPoint(str, Enum):
     health = "110"
 
 
-class ACMode(str, Enum):
+class ACMode(StrEnum):
     auto = "auto"
     cool = "cold"
     heat = "heat"
@@ -42,7 +42,7 @@ class ACMode(str, Enum):
     vent = "fan"
 
 
-class ACFanSpeed(str, Enum):
+class ACFanSpeed(StrEnum):
     auto = "auto"
     quiet = "mute"
     L1 = "low"

@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 
 import pytest
 
 from local_tuya.device.constraints import Constraint, Constraints
 
 
-class DPS(str, Enum):
+class DPS(StrEnum):
     A = "1"
     B = "2"
     C = "3"
