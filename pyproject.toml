@@ -14,19 +14,19 @@ dependencies = [
     "concurrent-tasks ==1.16.3",
     "imbue==2.2.1",
     "pycryptodomex ==3.23.0",
-    "pydantic-settings[yaml]==2.14.2",
+    "pydantic-settings[yaml]==2.15.0",
     "uvloop ==0.22.1",
 ]
 license-files = ["LICENSE"]
 
 [dependency-groups]
 dev = [
-    "pre-commit==4.6.1",
+    "pre-commit==4.6.2",
     "pytest==9.1.1",
     "pytest-asyncio==1.4.0",
     "pytest-mock ==3.15.1",
-    "ruff==0.15.22",
-    "ty==0.0.70",
+    "ruff==0.16.3",
+    "ty==0.0.72",
 ]
 
 [tool.pytest]

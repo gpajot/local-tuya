@@ -7,6 +7,7 @@ For some devices, certain modes don't support all commands.
 As an example, to forbid setting turbo mode of a fan on eco mode:
 ```python
 from local_tuya import Constraint
+
 constraint = Constraint(
     DataPoint.eco,
     True,
