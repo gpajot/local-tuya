@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM dhi.io/python:3.14-dev AS python-builder-base
 
 WORKDIR /app
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9,source=/uv,target=/bin/uv \
@@ -8,6 +8,11 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.9,source=/uv,target=/bin/uv \
     --mount=type=bind,source=LICENSE,target=LICENSE \
     --mount=type=bind,source=README.md,target=README.md \
     uv sync --frozen --no-dev --no-editable --compile-bytecode
+
+FROM dhi.io/python:3.14
+
+WORKDIR /app
+COPY --from=python-builder-base /app/.venv .venv/
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV CONFIG="/app/config/conf.yaml"
