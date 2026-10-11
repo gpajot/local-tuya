@@ -1,6 +1,6 @@
 import asyncio
 import logging.config
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import AsyncExitStack, asynccontextmanager
 
 from concurrent_tasks import BackgroundTask, LoopExceptionHandler
@@ -64,7 +64,7 @@ class DeviceManager(AsyncExitStack):
         self,
         device_config: FullDeviceConfig,
         protocol: Protocol,
-    ) -> AsyncIterator[Device]:
+    ) -> AsyncGenerator[Device]:
         device_class = device_config.infer()
         async with Container(
             TuyaPackage(
