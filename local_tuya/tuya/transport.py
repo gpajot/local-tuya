@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import AbstractContextManager, AsyncExitStack, contextmanager
 from functools import partial
 from typing import Self
@@ -120,7 +120,7 @@ class Transport(AsyncExitStack):
         return self
 
     @contextmanager
-    def reader(self) -> Iterator[None]:
+    def reader(self) -> Generator[None]:
         self._reader = self._stream.reader
         try:
             yield None
