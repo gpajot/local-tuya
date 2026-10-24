@@ -43,14 +43,11 @@ wheels = [
 
 [[package]]
 name = "concurrent-tasks"
-version = "1.16.3"
+version = "1.18.0"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/d7/c04fe9975c0e02d71cb9c3bdb34ab5935bd93f156e717c059e9500a2fb43/concurrent_tasks-1.16.3.tar.gz", hash = "sha256:927d93b34f90ccba45a496795fff7ad1c569abef01fc190ff7fed3091b708378", size = 12938, upload-time = "2025-09-30T17:47:51.019Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/c4/063336066bac1e6d1a0d17ea0195a50bf8c8cec0c98e9ecb7e2196199739/concurrent_tasks-1.18.0.tar.gz", hash = "sha256:e5d3f9566d6b14771ddb7a121379cf859c2bea834f226e0e047b1481f1082977", size = 14164, upload-time = "2026-10-12T06:28:45.206Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ee/79/393dbd8045de414689f9866b6511d08949a4b1218c5eb51d37d6e5e03198/concurrent_tasks-1.16.3-py3-none-any.whl", hash = "sha256:e9e1c0becdb6191b46fe554d66a0e54722d3d66cb6292152f63f6e4b3c57a8d5", size = 21061, upload-time = "2025-09-30T17:47:49.594Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/f0/b67e021b8e97432021c9cd56a426d1858f6c9e6f92d12911b8421e6fef70/concurrent_tasks-1.18.0-py3-none-any.whl", hash = "sha256:1d8e9d0158125240ac68fa94c1758fe21cc3611d2d72fcb2bb0c20adac81c0c6", size = 20723, upload-time = "2026-10-12T06:28:44.168Z" },
 ]
 
 [[package]]
@@ -124,7 +121,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiomqtt", marker = "python_full_version < '4'", specifier = "==2.5.1" },
-    { name = "concurrent-tasks", specifier = "==1.16.3" },
+    { name = "concurrent-tasks", specifier = "==1.18.0" },
     { name = "imbue", specifier = "==2.2.1" },
     { name = "pycryptodomex", specifier = "==3.24.0" },
     { name = "pydantic-settings", extras = ["yaml"], specifier = "==2.15.0" },
