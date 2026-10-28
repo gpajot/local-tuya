@@ -1,7 +1,7 @@
 # local-tuya
 
 [![tests](https://github.com/gpajot/local-tuya/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/local-tuya/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![DockerHub](https://img.shields.io/docker/v/gpajot/local-tuya/latest)](https://hub.docker.com/r/gpajot/local-tuya)
+[![Docker Image Version (tag)](https://img.shields.io/docker/v/gpajot/local-tuya/latest?label=DockerHub)](https://hub.docker.com/r/gpajot/local-tuya)
 
 Control Tuya devices with MQTT over LAN.
 
