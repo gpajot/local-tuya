@@ -1,10 +1,10 @@
 [project]
 name = "local_tuya"
-version = "5.3.0"
+version = "5.4.0"
 description = "Control Tuya devices with MQTT over LAN."
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 authors = [
     { name = "Gabriel Pajot", email = "gab@lescactus.eu" },
 ]
@@ -46,7 +46,6 @@ unused-ignore-comment = "warn"
 
 [tool.ty.terminal]
 error-on-warning = true
-
 [build-system]
-requires = ["uv_build>=0.9.17,<0.13"]
+requires = ["uv_build>=0.13.4,<0.14"]
 build-backend = "uv_build"
