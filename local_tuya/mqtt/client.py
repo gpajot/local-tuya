@@ -3,7 +3,9 @@ import contextlib
 import json
 import logging
 from collections.abc import AsyncIterator
+from importlib import metadata
 from time import time_ns
+from typing import ClassVar
 
 import aiomqtt
 from concurrent_tasks import BackgroundTask
@@ -13,16 +15,22 @@ from local_tuya.mqtt.config import (
     get_state_topic,
     get_status_topic,
 )
-from local_tuya.mqtt.discovery import DiscoveryMessage
+from local_tuya.mqtt.discovery import (
+    convert_to_component_messages,
+    get_discovery_message,
+)
 from local_tuya.protocol import DeviceDiscovery, Protocol, Value, Values
 
 logger = logging.getLogger(__name__)
 
 
 class MQTTClient(Protocol):
+    _VERSION: ClassVar[str] = metadata.version("local-tuya")
+
     def __init__(self, config: MQTTConfig):
         self.timeout = config.timeout
         self._discovery_prefix = config.discovery_prefix
+        self._discovery_type = config.discovery_type
         self._driver_prefix = config.driver_prefix
         self._status_topic = get_status_topic(config.driver_prefix, "driver")
         self._client = aiomqtt.Client(
@@ -159,16 +167,28 @@ class MQTTClient(Protocol):
         device_id: str,
         device_name: str,
     ) -> None:
-        message = DiscoveryMessage(
-            discovery_prefix=self._discovery_prefix,
+        message = get_discovery_message(
             driver_prefix=self._driver_prefix,
             device=device,
             device_id=device_id,
             device_name=device_name,
+            version=self._VERSION,
         )
-        for component in device.components:
-            topic, payload = message.get(component)
-            await self._publish(topic, json.dumps(payload), retain=True)
+        if self._discovery_type == "device":
+            await self._publish(
+                f"{self._discovery_prefix}/device/{device_id}/config",
+                json.dumps(message),
+                retain=True,
+            )
+        else:
+            for component_type, component_message in convert_to_component_messages(
+                message
+            ):
+                await self._publish(
+                    f"{self._discovery_prefix}/{component_type}/{device_id}/{component_message['unique_id'].split('-')[-1]}/config",
+                    json.dumps(message),
+                    retain=True,
+                )
 
     async def _publish(
         self,
