@@ -37,23 +37,24 @@ def get_discovery_message(
         ],
         "availability_mode": "all",
         "state_topic": get_state_topic(driver_prefix, device_id),
-        "components": [
-            {
+        "components": {
+            comp.property: {
                 "name": comp.name,
                 "icon": comp.icon,
                 "unique_id": f"{driver_prefix}-{device_id}-{comp.property}",
                 **_get_component(comp, driver_prefix, device_id),
             }
             for comp in device.components
-        ],
+        },
     }
 
 
 def convert_to_component_messages(
     message: dict[str, Any],
-) -> Iterator[tuple[str, dict[str, Any]]]:
-    for component in message.pop("components"):
+) -> Iterator[tuple[str, str, dict[str, Any]]]:
+    for prop, component in message.pop("components", {}).items():
         yield (
+            prop,
             cast(str, component.pop("platform")),
             {
                 **message,
