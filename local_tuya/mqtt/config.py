@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from local_tuya.backoff import SequenceBackoff
@@ -13,6 +15,7 @@ def get_status_topic(driver_prefix: str, device_id: str) -> str:
 
 class MQTTConfig(BaseModel):
     discovery_prefix: str = "local-tuya"
+    discovery_type: Literal["device", "component"] = "component"
     driver_prefix: str = "local-tuya"
     hostname: str
     port: int = 1883
