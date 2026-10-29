@@ -181,12 +181,14 @@ class MQTTClient(Protocol):
                 retain=True,
             )
         else:
-            for component_type, component_message in convert_to_component_messages(
-                message
-            ):
+            for (
+                component_prop,
+                component_type,
+                component_message,
+            ) in convert_to_component_messages(message):
                 await self._publish(
-                    f"{self._discovery_prefix}/{component_type}/{device_id}/{component_message['unique_id'].split('-')[-1]}/config",
-                    json.dumps(message),
+                    f"{self._discovery_prefix}/{component_type}/{device_id}/{component_prop}/config",
+                    json.dumps(component_message),
                     retain=True,
                 )
 
