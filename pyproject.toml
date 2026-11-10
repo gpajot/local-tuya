@@ -1,5 +1,5 @@
 [project]
-name = "local_tuya"
+name = "local-tuya"
 version = "5.5.1"
 description = "Control Tuya devices with MQTT over LAN."
 license = "MIT"
@@ -21,7 +21,6 @@ license-files = ["LICENSE"]
 
 [dependency-groups]
 dev = [
-    "pre-commit==4.7.0",
     "pytest==9.1.1",
     "pytest-asyncio==1.4.1.post1",
     "pytest-mock==3.17.0",
@@ -47,5 +46,5 @@ unused-ignore-comment = "warn"
 [tool.ty.terminal]
 error-on-warning = true
 [build-system]
-requires = ["uv_build>=0.13.4,<0.14"]
+requires = ["uv_build>=0.13,<0.14"]
 build-backend = "uv_build"
