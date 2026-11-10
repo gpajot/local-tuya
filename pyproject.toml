@@ -13,7 +13,7 @@ dependencies = [
     "aiomqtt ==2.5.1 ; python_version < '4'",
     "concurrent-tasks==1.18.0",
     "imbue==2.3.0",
-    "pycryptodomex==3.24.1",
+    "pycryptodomex==3.24.2",
     "pydantic-settings[yaml]==2.16.2",
     "uvloop==0.23.0",
 ]
