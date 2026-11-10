@@ -1,0 +1,31 @@
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "end-of-file-fixer" },
+    { id = "trailing-whitespace" },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "lint"
+name = "lint"
+language = "system"
+entry = "uv run ruff check --fix"
+types = ["python"]
+
+[[repos.hooks]]
+id = "format"
+name = "format"
+language = "system"
+entry = "uv run ruff format"
+types = ["python"]
+
+[[repos.hooks]]
+id = "check-types"
+name = "check-types"
+language = "system"
+entry = "uv run ty check"
+pass_filenames = false
+types = ["python"]
